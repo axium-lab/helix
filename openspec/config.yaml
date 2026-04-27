@@ -1,0 +1,82 @@
+schema: spec-driven
+
+context: |
+  Project: helix-lib — TypeScript library that unifies multiple LLM providers
+    (OpenAI, OpenAI Azure, OpenAI custom, Google Vertex) behind a single contract.
+  Stack: TypeScript (greenfield — package.json not yet initialized).
+  Architecture: Hexagonal / Ports & Adapters. Core ports define capabilities;
+    each provider is an adapter. All responses normalized to OpenAI Response format (PR1).
+  Testing: Not yet installed. Vitest recommended (lightweight per PR2).
+  Style: Not yet configured. ESLint + Prettier + tsc --noEmit recommended.
+
+strict_tdd: false  # No test runner installed yet — flip to true once Vitest is set up
+
+testing:
+  detected_at: 2026-04-27
+  strict_tdd_marker: enabled  # From user CLAUDE.md
+  test_runner:
+    framework: none
+    command: ""
+    note: "Project is empty. Recommend Vitest for PR2 (lightweight) compliance."
+  layers:
+    unit: not_installed
+    integration: not_installed
+    e2e: not_installed
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter: not_installed
+    type_checker: not_installed
+    formatter: not_installed
+
+helix_principles:
+  PR1: "All LLM request functions MUST return OpenAI Response format (even Vertex)."
+  PR2: "Use the lightest libraries possible. Avoid LangChain. Prefer parent libs over wrappers. When possible, use no library."
+  PR3: "Tests are MANDATORY with: openAI, openAI Azure, openAI custom, Google Vertex."
+  PR4: "Phase 1 compatibility: openAI, openAI azure, openAI custom (no files), Google Vertex."
+  PR5: "Whenever possible, use OpenAI API Response for requests and return that format."
+  PR6: "Standardize all errors (invalid api-key, server error, etc.) into a unified error model."
+
+helix_capabilities:
+  HX1: "RM/Proxy — send text requests to LLMs."
+  HX2: "Files — CRD over files (upload with optional TTL, list, delete)."
+  HX3: "RM/Proxy + Files — ephemeral files in same call; option to use already-uploaded files."
+  HX4: "Native LLM tools (web search, etc.) — different per provider."
+  HX5: "Custom tools — capture tool call and re-execute LLM."
+  HX6: "Optional params (temperature, maxTokens, thinking) — translated per provider."
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Identify affected modules/packages
+    - State which Helix principles (PR1–PR6) and capabilities (HX1–HX6) the change touches
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Tie every requirement back to a PR or HX identifier where applicable
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Explicitly separate Ports (interfaces) from Adapters (provider implementations)
+    - Document the response normalization contract (everything → OpenAI Response)
+    - Document the error normalization contract (everything → HelixError)
+  tasks:
+    - Group tasks by phase (infrastructure, ports, adapters, normalization, tests)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+    - Keep tasks small enough to complete in one session
+    - Tests for all 4 providers are NOT optional (PR3)
+  apply:
+    - Follow Hexagonal architecture — never mix port logic with adapter logic
+    - Respect PR2 — no heavy dependencies without explicit justification in design
+    tdd: false  # Will become true once Vitest is installed
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+    - Compare implementation against every spec scenario
+    - Verify response shape matches OpenAI Response format (PR1)
+    - Verify errors are standardized HelixError (PR6)
+  archive:
+    - Warn before merging destructive deltas (large removals)
