@@ -2,7 +2,7 @@
 
 **Goal**: Land the public TypeScript interface surface for helix-lib. Implementation, tests, and infra bootstrap are subsequent changes.
 
-**Total tasks**: 24
+**Total tasks**: 22
 
 **Explicitly OUT of scope**: test files, ESLint/Prettier config, adapter implementation bodies (only `not-implemented` stubs), `src/core/normalize/` files, `runToolLoop`, streaming types, `n > 1` support.
 

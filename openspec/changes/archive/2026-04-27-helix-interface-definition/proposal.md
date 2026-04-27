@@ -417,10 +417,9 @@ export declare function createOpenAI(config: OpenAIConfig): HelixClient;
 export interface AzureOpenAIConfig {
   apiKey: string;
   endpoint: string;
-  /** Azure deployment name used as the "model" identifier in requests. */
-  deployment?: string;
   /** REQUIRED — Azure breaks across versions (see Q10). */
   apiVersion: string;
+  // Note: deployment name comes from HelixRequest.model at call time (REQ-FAC-007)
 }
 export declare function createAzureOpenAI(config: AzureOpenAIConfig): HelixClient;
 
