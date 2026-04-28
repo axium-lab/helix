@@ -33,7 +33,11 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

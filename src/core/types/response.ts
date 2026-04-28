@@ -3,36 +3,19 @@ export interface OutputTextPart {
   text: string;
 }
 
-export interface RefusalPart {
-  type: "refusal";
-  refusal: string;
-}
-
-export type OutputContentPart = OutputTextPart | RefusalPart;
-
 export interface OutputMessage {
   type: "message";
   id: string;
   role: "assistant";
-  content: OutputContentPart[];
+  content: OutputTextPart[];
   status?: "in_progress" | "completed" | "incomplete";
 }
 
-export interface FunctionCallOutput {
-  type: "function_call";
-  id: string;
-  call_id: string;
-  name: string;
-  arguments: string;
-}
-
-export interface ReasoningOutput {
-  type: "reasoning";
-  id: string;
-  summary: Array<{ type: "summary_text"; text: string }>;
-}
-
-export type OutputItem = OutputMessage | FunctionCallOutput | ReasoningOutput;
+/**
+ * v0 supports message output only; tool/refusal/reasoning variants return
+ * in the future `helix-tools` and `helix-error-model` changes.
+ */
+export type OutputItem = OutputMessage;
 
 export interface HelixUsage {
   input_tokens: number;
@@ -48,5 +31,4 @@ export interface HelixResponse {
   output: OutputItem[];
   output_text: string;
   usage: HelixUsage;
-  metadata?: Record<string, unknown>;
 }
