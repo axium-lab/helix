@@ -23,7 +23,11 @@ export function createOpenAIAdapter(config: OpenAIConfig): Helix {
     },
     files: {
       async create(params) {
-        return client.files.create(params as Parameters<typeof client.files.create>[0]) as unknown as FileObject;
+        const file =
+          params.file instanceof File
+            ? params.file
+            : new File([params.file], "blob", { type: params.file.type || "application/octet-stream" });
+        return (await client.files.create({ ...params, file })) as FileObject;
       },
       async list() {
         const page = await client.files.list();

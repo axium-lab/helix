@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // vi.mock is hoisted before imports; factory runs at module load.
 vi.mock("openai", () => {
@@ -8,7 +8,7 @@ vi.mock("openai", () => {
 });
 
 import { AzureOpenAI } from "openai";
-import { createAzureAdapter } from "../azure.js";
+import { createAzureAdapter } from "../../src/internal/providers/azure.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -50,9 +50,6 @@ const FILE_DELETED_OK = {
   deleted: true,
 };
 
-const AZURE_MODELS_LIST_ERROR_MSG =
-  "helix-lib: 'models.list' not supported by provider 'azure' — Azure data-plane deployment listing was retired April 2024; ARM management plane requires credentials not present in HelixConfig.azure";
-
 // ---------------------------------------------------------------------------
 // Mock setup
 // ---------------------------------------------------------------------------
@@ -66,12 +63,15 @@ beforeEach(() => {
   vi.mocked(AzureOpenAI).mockImplementation((_opts?: unknown) => ({
     responses: { create: mockResponsesCreate },
     files: { create: mockFilesCreate, list: mockFilesList, delete: mockFilesDelete },
-    // models.list is not delegated to the SDK on Azure — the adapter throws synchronously
   }) as unknown as InstanceType<typeof AzureOpenAI>);
 
   [mockResponsesCreate, mockFilesCreate, mockFilesList, mockFilesDelete].forEach(
     (m) => m.mockReset(),
   );
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 // ---------------------------------------------------------------------------
@@ -200,39 +200,68 @@ describe("createAzureAdapter — files.delete", () => {
 });
 
 // ---------------------------------------------------------------------------
-// describe: models.list throws (REQ-AZ-004)
+// describe: models.list (REQ-AZ-LM-1..7 — replaced REQ-AZ-004)
 // ---------------------------------------------------------------------------
 
 describe("createAzureAdapter — models.list", () => {
-  const adapter = createAzureAdapter({
-    provider: "azure",
-    apiKey: "k",
-    endpoint: AZURE_ENDPOINT,
-    apiVersion: API_VERSION,
-  });
+  it("returns sorted ModelInfo[] on 200", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        data: [{ id: "gpt-4o" }, { id: "ada-002" }],
+      }),
+    }));
 
-  it("throws synchronously with exact ARM message — no HTTP call", () => {
-    expect(() => adapter.models.list()).toThrow(AZURE_MODELS_LIST_ERROR_MSG);
-  });
+    const adapter = createAzureAdapter({
+      provider: "azure",
+      apiKey: "k",
+      endpoint: AZURE_ENDPOINT,
+      apiVersion: API_VERSION,
+    });
 
-  it("error is a plain Error (not a subclass)", () => {
-    try {
-      adapter.models.list();
-      expect.fail("Should have thrown");
-    } catch (e) {
-      expect(e instanceof Error).toBe(true);
-      expect((e as Error).constructor).toBe(Error);
-      expect((e as Error).message).toBe(AZURE_MODELS_LIST_ERROR_MSG);
+    const result = await adapter.models.list();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0].id).toBe("ada-002");
+    expect(result[1].id).toBe("gpt-4o");
+    for (const m of result) {
+      expect(m.object).toBe("model");
+      expect(m.created).toBe(0);
+      expect(m.owned_by).toBe("azure");
     }
   });
 });
 
 // ---------------------------------------------------------------------------
-// describe: test() (REQ-AZ-005)
+// describe: test() (REQ-AZ-005 replaced — now resolves true on success)
 // ---------------------------------------------------------------------------
 
 describe("createAzureAdapter — test()", () => {
-  it("always resolves false on Azure (models.list always throws)", async () => {
+  it("resolves true when models.list succeeds", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ data: [{ id: "gpt-4o" }] }),
+    }));
+
+    const adapter = createAzureAdapter({
+      provider: "azure",
+      apiKey: "k",
+      endpoint: AZURE_ENDPOINT,
+      apiVersion: API_VERSION,
+    });
+
+    const result = await adapter.test();
+    expect(result).toBe(true);
+  });
+
+  it("resolves false when models.list throws", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({}),
+    }));
+
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
@@ -245,6 +274,8 @@ describe("createAzureAdapter — test()", () => {
   });
 
   it("never rejects", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("network failure")));
+
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",

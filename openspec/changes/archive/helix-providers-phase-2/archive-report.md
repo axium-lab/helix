@@ -237,3 +237,49 @@ All gates passed before handing back for commit:
 | `@mswjs/interceptors` absent from `package-lock.json` | CONFIRMED — grep returns 0 matches |
 | `openspec/specs/test-suite/spec.md` updated | CONFIRMED — no MSW references remain |
 | `openspec/specs/dependencies/spec.md` updated | CONFIRMED — REQ-DEP-003 inverted to prohibit MSW |
+
+---
+
+## Post-Archive Correction #2 (in-flight before commit) — Test layout reorganization
+
+**Date**: 2026-04-28
+
+### Rationale
+
+After the MSW→vi.mock correction above, the unit-test files were moved out of `src/` and consolidated under a single top-level `tests/` directory mirroring the integration tier. Cleaner separation between source code and test code: `src/` now contains only production code; all test discovery lives under `tests/`.
+
+### Code Changes
+
+- **MOVED**: `src/internal/providers/__tests__/{openai,azure,custom}.test.ts` → `tests/unit/{openai,azure,custom}.test.ts`
+- **REMOVED**: `src/internal/providers/__tests__/` (now-empty directory)
+- **MODIFIED**: each moved file's adapter import path updated from `../<provider>.js` to `../../src/internal/providers/<provider>.js`
+- **MODIFIED**: `vitest.config.ts` `include` glob updated from `"src/**/__tests__/**/*.test.ts"` to `"tests/unit/**/*.test.ts"`
+- **MODIFIED**: `vitest.config.ts` extended with `loadEnv(mode, process.cwd(), "")` so a gitignored `.env` populates `process.env` for the test process — enables the integration tier to read `HELIX_OPENAI_API_KEY` from `.env` instead of inline shell prefixes
+- **ADDED**: `tests/integration/fixtures/sample.txt` — small fixture for the new files lifecycle integration test
+- **ADDED**: integration test `it("files lifecycle: create, list, delete", ...)` in `tests/integration/openai.test.ts` — uploads a real file via `helix.files.create`, asserts shape, lists, deletes (cleanup in `try/finally`)
+
+### Spec Changes
+
+The delta specs inside this archive folder reference the old `src/internal/providers/__tests__/` path verbatim (e.g., in `tasks.md` and the REQ-coverage table in `verify-report.md`). These references are left intact as a faithful record of the as-archived state. The live `openspec/specs/test-suite/spec.md` uses generic language ("test directory") and required no edits.
+
+### Validation Against Real OpenAI
+
+Beyond unit tests, the consumer ran the integration tier with a real `HELIX_OPENAI_API_KEY` against `api.openai.com`. All OpenAI integration tests passed end-to-end:
+
+| Test | Result |
+|------|--------|
+| `responses.create round-trips` | ✓ ~4.4s |
+| `test() resolves true` | ✓ ~1.2s |
+| `files lifecycle: create, list, delete` | ✓ |
+
+This validates the closure-based SDK lifecycle, the `as unknown as HelixResponse` cast, real token usage parsing, and end-to-end file upload/list/delete semantics.
+
+### Verification Gates (Post-Correction #2)
+
+| Gate | Result |
+|------|--------|
+| `npx tsc --noEmit` | EXIT 0 |
+| `npx vitest run tests/unit/` | 34 pass — EXIT 0 |
+| `src/internal/providers/__tests__/` directory absent | CONFIRMED |
+| `tests/unit/{openai,azure,custom}.test.ts` present | CONFIRMED |
+| Vitest discovery picks up new layout via updated `include` | CONFIRMED |

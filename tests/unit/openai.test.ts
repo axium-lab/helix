@@ -8,7 +8,7 @@ vi.mock("openai", () => {
 });
 
 import { OpenAI } from "openai";
-import { createOpenAIAdapter } from "../openai.js";
+import { createOpenAIAdapter } from "../../src/internal/providers/openai.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures

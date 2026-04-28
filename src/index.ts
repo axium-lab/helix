@@ -19,5 +19,6 @@ export type {
   OutputTextPart,
   FilesCreateParams,
   FileObject,
+  HelixFilePurpose,
   ModelInfo,
 } from "./core/index.js";

@@ -1,6 +1,20 @@
+/**
+ * SOURCE OF TRUTH: mirrors `openai`'s `FilePurpose` from
+ * `node_modules/openai/resources/files.d.ts`.
+ * When upgrading the `openai` dependency, audit this union for drift.
+ * Helix must ship a patch release that mirrors any new value.
+ */
+export type HelixFilePurpose =
+  | "assistants"
+  | "batch"
+  | "fine-tune"
+  | "vision"
+  | "user_data"
+  | "evals";
+
 export interface FilesCreateParams {
-  file: Uint8Array | ArrayBuffer | Blob;
-  purpose?: string;
+  file: File | Blob;
+  purpose: HelixFilePurpose;
   expires_after?: { anchor: "created_at"; seconds: number };
 }
 

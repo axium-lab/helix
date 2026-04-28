@@ -25,6 +25,7 @@ export type {
 export type {
   FilesCreateParams,
   FileObject,
+  HelixFilePurpose,
 } from "./types/files.js";
 
 export type { ModelInfo } from "./types/models.js";

@@ -1,8 +1,8 @@
 # Spec: Files
 
-**Change**: helix-public-api-redesign
+**Change**: helix-public-api-redesign → amended by helix-files-params-tightening
 **Domain**: files
-**Status**: stable (archived 2026-04-28)
+**Status**: stable (amended 2026-04-28)
 
 ## Overview
 
@@ -21,15 +21,24 @@ Defines `helix.files.create`, `helix.files.list`, and `helix.files.delete` contr
 
 | Field | Type | Required |
 |-------|------|----------|
-| `file` | `Uint8Array \| ArrayBuffer \| Blob` | MUST |
-| `purpose` | `string` | OPTIONAL |
+| `file` | `File \| Blob` | MUST |
+| `purpose` | `HelixFilePurpose` | MUST |
 | `expires_after` | `{ anchor: "created_at"; seconds: number }` | OPTIONAL |
 
 Field names MUST use snake_case (ADR-1). No ephemeral inline content parts exist (RD-8).
 
+> **Breaking from helix-public-api-redesign (v0.0.1 → v0.1.0)**
+>
+> | Field | Before | After | Reason |
+> |-------|--------|-------|--------|
+> | `file` | `Uint8Array \| ArrayBuffer \| Blob` | `File \| Blob` | `Uint8Array`/`ArrayBuffer` were accepted at compile time but crashed at runtime inside the SDK (`Uploadable` does not include them). Type is now honest. |
+> | `purpose` | `string` (OPTIONAL) | `HelixFilePurpose` (REQUIRED) | Server returns 400 when omitted; `string` allowed invalid values. Closed literal union matches OpenAI's `FilePurpose` exactly. |
+>
+> **Migration**: See `CHANGELOG.md` v0.1.0 for code recipes.
+
 #### Scenario: Upload with minimal params
 
-- **GIVEN** `params = { file: new Uint8Array([...]) }` and provider is OpenAI
+- **GIVEN** `params = { file: new File([buf], "doc.pdf", { type: "application/pdf" }), purpose: "user_data" }` and provider is OpenAI
 - **WHEN** `helix.files.create(params)` is called
 - **THEN** the promise MUST resolve with a `FileObject`
 - **AND** `FileObject.id` MUST be a non-empty string usable as `file_id` in `InputFile`
