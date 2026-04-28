@@ -1,29 +1,48 @@
+import OpenAI from "openai";
 import type { HelixConfig } from "../../core/types/config.js";
 import type { Helix } from "../../createHelix.js";
+import type { HelixResponse } from "../../core/types/response.js";
+import type { FileObject } from "../../core/types/files.js";
+import type { ModelInfo } from "../../core/types/models.js";
 
 type OpenAIConfig = Extract<HelixConfig, { provider: "openai" }>;
 
 export function createOpenAIAdapter(config: OpenAIConfig): Helix {
+  const client = new OpenAI({
+    apiKey: config.apiKey,
+    ...(config.baseUrl && { baseURL: config.baseUrl }),
+  });
+
   return {
     responses: {
-      create(_params) {
-        throw new Error("not implemented");
+      async create(params) {
+        return client.responses.create(
+          params as Parameters<typeof client.responses.create>[0],
+        ) as unknown as HelixResponse;
       },
     },
     files: {
-      create(_params) {
-        throw new Error("not implemented");
+      async create(params) {
+        return client.files.create(params as Parameters<typeof client.files.create>[0]) as unknown as FileObject;
       },
-      list() {
-        throw new Error("not implemented");
+      async list() {
+        const page = await client.files.list();
+        return page.data as unknown as FileObject[];
       },
-      delete(_id) {
-        throw new Error("not implemented");
+      async delete(id) {
+        const res = await client.files.delete(id);
+        return { id: res.id, deleted: true as const };
       },
     },
     models: {
-      list() {
-        throw new Error("not implemented");
+      async list() {
+        const page = await client.models.list();
+        return page.data.map((m) => ({
+          id: m.id,
+          object: "model" as const,
+          created: m.created,
+          owned_by: m.owned_by,
+        })) as ModelInfo[];
       },
     },
     async test() {

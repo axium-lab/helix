@@ -1,13 +1,23 @@
+import OpenAI from "openai";
 import type { HelixConfig } from "../../core/types/config.js";
 import type { Helix } from "../../createHelix.js";
+import type { HelixResponse } from "../../core/types/response.js";
+import type { ModelInfo } from "../../core/types/models.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
 export function createCustomAdapter(config: CustomConfig): Helix {
+  const client = new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: config.baseUrl,
+  });
+
   return {
     responses: {
-      create(_params) {
-        throw new Error("not implemented");
+      async create(params) {
+        return client.responses.create(
+          params as Parameters<typeof client.responses.create>[0],
+        ) as unknown as HelixResponse;
       },
     },
     files: {
@@ -22,8 +32,14 @@ export function createCustomAdapter(config: CustomConfig): Helix {
       },
     },
     models: {
-      list() {
-        throw new Error("not implemented");
+      async list() {
+        const page = await client.models.list();
+        return page.data.map((m) => ({
+          id: m.id,
+          object: "model" as const,
+          created: m.created,
+          owned_by: m.owned_by,
+        })) as ModelInfo[];
       },
     },
     async test() {

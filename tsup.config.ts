@@ -9,6 +9,7 @@ export default defineConfig([
     clean: false,
     splitting: false,
     target: "es2022",
+    external: ["openai"],
   },
   {
     entry: ["src/index.ts"],
@@ -18,6 +19,7 @@ export default defineConfig([
     clean: false,
     splitting: false,
     target: "es2022",
+    external: ["openai"],
   },
   {
     entry: ["src/index.ts"],
@@ -27,5 +29,6 @@ export default defineConfig([
     clean: false,
     splitting: false,
     target: "es2022",
+    external: ["openai"],
   },
 ]);
