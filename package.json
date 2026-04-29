@@ -1,5 +1,5 @@
 {
-  "name": "@axium-lab/helix-lib",
+  "name": "@axium-lab/helix",
   "version": "0.1.0",
   "description": "Unified TypeScript interface for multiple LLM providers (OpenAI, Azure, custom, Vertex)",
   "license": "UNLICENSED",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/axium-lab/helix-lib.git"
+    "url": "git+https://github.com/axium-lab/helix.git"
   },
   "publishConfig": {
     "@axium-lab:registry": "https://npm.pkg.github.com",
