@@ -1,13 +1,13 @@
 import type { HelixConfig } from "./core/index.js";
 import type { ResponsesCreateParams } from "./core/types/request.js";
-import type { HelixResponse } from "./core/types/response.js";
-import type { FilesCreateParams, FileObject } from "./core/types/files.js";
+import type { HelixResponse } from "./core/types/responses/llm.response.js";
+import type { FilesCreateParams, FileObject } from "./core/types/responses/file.response.js";
 import type { ModelInfo } from "./core/types/models.js";
 
-import { createOpenAIAdapter } from "./internal/providers/openai.js";
-import { createAzureAdapter } from "./internal/providers/azure.js";
-import { createCustomAdapter } from "./internal/providers/custom.js";
-import { createVertexAdapter } from "./internal/providers/vertex.js";
+import { createOpenAIAdapter } from "./internal/providers/openai/openai.js";
+import { createAzureAdapter } from "./internal/providers/azure/azure.js";
+import { createCustomAdapter } from "./internal/providers/custom/custom.js";
+import { createVertexAdapter } from "./internal/providers/vertex/vertex.js";
 
 export interface Helix {
   responses: {

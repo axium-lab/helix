@@ -3,10 +3,12 @@ export interface OutputTextPart {
   text: string;
 }
 
+type OutputRole = "user" | "system" | "assistant" | "tool";
+
 export interface OutputMessage {
   type: "message";
   id: string;
-  role: "assistant";
+  role: OutputRole;
   content: OutputTextPart[];
   status?: "in_progress" | "completed" | "incomplete";
 }

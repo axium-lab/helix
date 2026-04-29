@@ -1,9 +1,9 @@
 import { AzureOpenAI } from "openai";
-import type { HelixConfig } from "../../core/types/config.js";
-import type { Helix } from "../../createHelix.js";
-import type { HelixResponse } from "../../core/types/response.js";
-import type { FileObject } from "../../core/types/files.js";
-import type { ModelInfo } from "../../core/types/models.js";
+import type { HelixConfig } from "../../../core/types/config.js";
+import type { Helix } from "../../../createHelix.js";
+import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
+import type { FileObject } from "../../../core/types/responses/file.response.js";
+import type { ModelInfo } from "../../../core/types/models.js";
 import { AzureFetchError } from "./azure-errors.js";
 
 // Azure data-plane /openai/deployments listing only works on older preview

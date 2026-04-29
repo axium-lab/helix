@@ -20,12 +20,12 @@ export type {
   OutputItem,
   HelixUsage,
   HelixResponse,
-} from "./types/response.js";
+} from "./types/responses/llm.response.js";
 
 export type {
   FilesCreateParams,
   FileObject,
   HelixFilePurpose,
-} from "./types/files.js";
+} from "./types/responses/file.response.js";
 
 export type { ModelInfo } from "./types/models.js";

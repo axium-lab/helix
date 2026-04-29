@@ -24,6 +24,6 @@ export interface FileObject {
   bytes: number;
   created_at: number;
   filename?: string;
-  purpose: string;
+  purpose: HelixFilePurpose;
   expires_at?: number;
 }

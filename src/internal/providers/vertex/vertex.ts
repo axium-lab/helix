@@ -1,5 +1,5 @@
-import type { HelixConfig } from "../../core/types/config.js";
-import type { Helix } from "../../createHelix.js";
+import type { HelixConfig } from "../../../core/types/config.js";
+import type { Helix } from "../../../createHelix.js";
 
 type VertexConfig = Extract<HelixConfig, { provider: "vertex" }>;
 

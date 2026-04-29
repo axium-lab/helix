@@ -1,8 +1,8 @@
 import OpenAI from "openai";
-import type { HelixConfig } from "../../core/types/config.js";
-import type { Helix } from "../../createHelix.js";
-import type { HelixResponse } from "../../core/types/response.js";
-import type { ModelInfo } from "../../core/types/models.js";
+import type { HelixConfig } from "../../../core/types/config.js";
+import type { Helix } from "../../../createHelix.js";
+import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
+import type { ModelInfo } from "../../../core/types/models.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
