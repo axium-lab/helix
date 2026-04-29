@@ -1,0 +1,7 @@
+                                                                   
+HELIX_OPENAI_API_KEY=
+
+HELIX_AZURE_API_VERSION=2025-04-01-preview
+HELIX_AZURE_DEPLOYMENT=
+HELIX_AZURE_ENDPOINT=
+HELIX_AZURE_API_KEY=
