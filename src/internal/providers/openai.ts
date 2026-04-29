@@ -45,7 +45,7 @@ export function createOpenAIAdapter(config: OpenAIConfig): Helix {
           id: m.id,
           object: "model" as const,
           created: m.created,
-          owned_by: m.owned_by,
+          owned_by: m.owned_by, //owned_by: "openai" |"system" | "<Axium-org-id>"
         })) as ModelInfo[];
       },
     },
