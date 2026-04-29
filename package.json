@@ -1,9 +1,8 @@
 {
   "name": "@fluxaria/helix-lib",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Unified TypeScript interface for multiple LLM providers (OpenAI, Azure, custom, Vertex)",
   "license": "UNLICENSED",
-  "private": true,
   "type": "module",
   "author": "pierslabs",
   "main": "./dist/cjs/index.cjs",
@@ -31,6 +30,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest",
