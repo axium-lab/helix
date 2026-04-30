@@ -7,6 +7,8 @@ export type {
   VertexCredentials,
   ResponsesCreateParams,
   HelixResponse,
+  HelixResponseStatus,
+  HelixIncompleteDetails,
   HelixUsage,
   HelixResponseFormat,
   HelixRole,

@@ -21,9 +21,21 @@ export interface OutputMessage {
  */
 export type OutputItem = OutputMessage;
 
+export type HelixResponseStatus =
+  | "completed"
+  | "incomplete"
+  | "in_progress"
+  | "failed";
+
+export interface HelixIncompleteDetails {
+  reason: "max_output_tokens" | "content_filter";
+}
+
 export interface HelixUsage {
   input_tokens: number;
+  input_tokens_details?: { cached_tokens: number };
   output_tokens: number;
+  output_tokens_details?: { reasoning_tokens: number };
   total_tokens: number;
 }
 
@@ -31,6 +43,10 @@ export interface HelixResponse {
   id: string;
   object: typeof HelixObject.Response;
   created_at: number;
+  completed_at: number | null;
+  status: HelixResponseStatus;
+  incomplete_details: HelixIncompleteDetails | null;
+  error: unknown | null;
   model: string;
   output: OutputItem[];
   output_text: string;

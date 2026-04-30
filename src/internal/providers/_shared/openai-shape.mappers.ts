@@ -1,12 +1,19 @@
 import type {
   Response as OpenAIResponse,
   ResponseCreateParamsNonStreaming,
+  ResponseError,
   ResponseInput,
   ResponseOutputMessage,
   ResponseOutputText,
+  ResponseStatus,
+  ResponseUsage,
 } from "openai/resources/responses/responses";
 
-import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
+import type {
+  HelixResponse,
+  HelixResponseStatus,
+  HelixUsage,
+} from "../../../core/types/responses/llm.response.js";
 import type { ResponsesCreateParams } from "../../../core/types/request.js";
 import { HelixObject } from "../../../core/types/helix-object.js";
 
@@ -51,6 +58,12 @@ export function toHelixResponse(r: OpenAIResponse): HelixResponse {
     id: r.id,
     object: HelixObject.Response,
     created_at: r.created_at,
+    completed_at: r.completed_at ?? null,
+    status: toHelixStatus(r.status),
+    incomplete_details: r.incomplete_details?.reason
+      ? { reason: r.incomplete_details.reason }
+      : null,
+    error: toHelixError(r.error),
     model: String(r.model),
     output: r.output
       .filter((item): item is ResponseOutputMessage => item.type === "message")
@@ -64,10 +77,48 @@ export function toHelixResponse(r: OpenAIResponse): HelixResponse {
         status: m.status,
       })),
     output_text: r.output_text,
-    usage: {
-      input_tokens: r.usage?.input_tokens ?? 0,
-      output_tokens: r.usage?.output_tokens ?? 0,
-      total_tokens: r.usage?.total_tokens ?? 0,
-    },
+    usage: toHelixUsage(r.usage),
   };
+}
+
+function toHelixStatus(status: ResponseStatus | undefined): HelixResponseStatus {
+  switch (status) {
+    case "completed":
+    case "incomplete":
+    case "in_progress":
+    case "failed":
+      return status;
+    case "cancelled":
+      return "failed";
+    case "queued":
+      return "in_progress";
+    case undefined:
+      return "completed";
+  }
+}
+
+function toHelixError(error: ResponseError | null): unknown | null {
+  return error ?? null;
+}
+
+function toHelixUsage(usage: ResponseUsage | undefined): HelixUsage {
+  if (!usage) {
+    return { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
+  }
+  const out: HelixUsage = {
+    input_tokens: usage.input_tokens,
+    output_tokens: usage.output_tokens,
+    total_tokens: usage.total_tokens,
+  };
+  if (usage.input_tokens_details?.cached_tokens !== undefined) {
+    out.input_tokens_details = {
+      cached_tokens: usage.input_tokens_details.cached_tokens,
+    };
+  }
+  if (usage.output_tokens_details?.reasoning_tokens !== undefined) {
+    out.output_tokens_details = {
+      reasoning_tokens: usage.output_tokens_details.reasoning_tokens,
+    };
+  }
+  return out;
 }

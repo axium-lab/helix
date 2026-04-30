@@ -20,6 +20,8 @@ export type {
   OutputItem,
   HelixUsage,
   HelixResponse,
+  HelixResponseStatus,
+  HelixIncompleteDetails,
 } from "./types/responses/llm.response.js";
 
 export type {
