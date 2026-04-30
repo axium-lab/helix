@@ -4,6 +4,7 @@ import type { Helix } from "../../../createHelix.js";
 import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
 import type { FileObject } from "../../../core/types/responses/file.response.js";
 import type { ModelInfo } from "../../../core/types/models.js";
+import { HelixObject } from "../../../core/types/helix-object.js";
 import { AzureFetchError } from "./azure-errors.js";
 
 // Azure data-plane /openai/deployments listing only works on older preview
@@ -94,8 +95,9 @@ export function createAzureAdapter(config: AzureConfig): Helix {
         return deployments
           .map((d) => ({
             id: d.id,
-            object: "model" as const,
-            created: 0,
+            object: HelixObject.Model,
+            type: undefined,
+            created: 0, // Azure's deployments API doesn't return creation timestamps, so we default to 0
             tools: [],
             owned_by: "azure",
           }))

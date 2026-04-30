@@ -1,3 +1,5 @@
+import { type HelixObject } from "../helix-object.js";
+
 export interface OutputTextPart {
   type: "output_text";
   text: string;
@@ -27,7 +29,7 @@ export interface HelixUsage {
 
 export interface HelixResponse {
   id: string;
-  object: "response";
+  object: typeof HelixObject.Response;
   created_at: number;
   model: string;
   output: OutputItem[];

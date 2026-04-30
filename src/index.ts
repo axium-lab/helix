@@ -22,3 +22,5 @@ export type {
   HelixFilePurpose,
   ModelInfo,
 } from "./core/index.js";
+
+export { HelixObject } from "./core/index.js";

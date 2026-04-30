@@ -29,3 +29,5 @@ export type {
 } from "./types/responses/file.response.js";
 
 export type { ModelInfo } from "./types/models.js";
+
+export { HelixObject } from "./types/helix-object.js";

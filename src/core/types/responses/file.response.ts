@@ -1,3 +1,5 @@
+import { type HelixObject } from "../helix-object.js";
+
 /**
  * SOURCE OF TRUTH: mirrors `openai`'s `FilePurpose` from
  * `node_modules/openai/resources/files.d.ts`.
@@ -20,7 +22,7 @@ export interface FilesCreateParams {
 
 export interface FileObject {
   id: string;
-  object: "file";
+  object: typeof HelixObject.File;
   bytes: number;
   created_at: number;
   filename?: string;

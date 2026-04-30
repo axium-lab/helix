@@ -3,6 +3,7 @@ import type { HelixConfig } from "../../../core/types/config.js";
 import type { Helix } from "../../../createHelix.js";
 import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
 import type { ModelInfo } from "../../../core/types/models.js";
+import { HelixObject } from "../../../core/types/helix-object.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
@@ -36,7 +37,8 @@ export function createCustomAdapter(config: CustomConfig): Helix {
         const page = await client.models.list();
         return page.data.map((m) => ({
           id: m.id,
-          object: "model" as const,
+          object: HelixObject.Model,
+          type: undefined,
           created: m.created,
           tools: [], // Custom provider doesn't support tools, so we return an empty array
           owned_by: m.owned_by,
