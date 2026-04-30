@@ -50,6 +50,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
       async list(): Promise<ModelInfo[]> {
         const url = `${config.endpoint.replace(/\/$/, "")}/openai/deployments?api-version=${AZURE_DEPLOYMENTS_API_VERSION}`;
         let res: Response;
+
         try {
           res = await fetch(url, {
             headers: {
@@ -95,6 +96,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
             id: d.id,
             object: "model" as const,
             created: 0,
+            tools: [],
             owned_by: "azure",
           }))
           .sort((a, b) => a.id.localeCompare(b.id));

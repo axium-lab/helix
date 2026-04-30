@@ -38,6 +38,7 @@ export function createCustomAdapter(config: CustomConfig): Helix {
           id: m.id,
           object: "model" as const,
           created: m.created,
+          tools: [], // Custom provider doesn't support tools, so we return an empty array
           owned_by: m.owned_by,
         })) as ModelInfo[];
       },
