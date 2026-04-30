@@ -1,9 +1,9 @@
 import OpenAI from "openai";
 import type { HelixConfig } from "../../../core/types/config.js";
 import type { Helix } from "../../../createHelix.js";
-import type { HelixResponse } from "../../../core/types/responses/llm.response.js";
 import type { ModelInfo } from "../../../core/types/models.js";
 import { HelixObject } from "../../../core/types/helix-object.js";
+import { toHelixResponse, toOpenAIParams } from "../_shared/openai-shape.mappers.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
@@ -16,9 +16,8 @@ export function createCustomAdapter(config: CustomConfig): Helix {
   return {
     responses: {
       async create(params) {
-        return client.responses.create(
-          params as Parameters<typeof client.responses.create>[0],
-        ) as unknown as HelixResponse;
+        const raw = await client.responses.create(toOpenAIParams(params));
+        return toHelixResponse(raw);
       },
     },
     files: {
