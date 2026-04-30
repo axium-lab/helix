@@ -16,7 +16,7 @@ const REQUIRED_CAST = "as Parameters<typeof client.responses.create>[0]";
 describe("adapter parameter-cast removal — REQ-FP-3, REQ-FP-4", () => {
   it("openai.ts files.create body has no Parameters<client.files.create> cast", async () => {
     const source = await readFile(
-      new URL("../../src/internal/providers/openai.ts", import.meta.url),
+      new URL("../../src/internal/providers/openai/openai.ts", import.meta.url),
       "utf8",
     );
     expect(source).not.toContain(FORBIDDEN_CAST);
@@ -24,7 +24,7 @@ describe("adapter parameter-cast removal — REQ-FP-3, REQ-FP-4", () => {
 
   it("azure.ts files.create body has no Parameters<client.files.create> cast", async () => {
     const source = await readFile(
-      new URL("../../src/internal/providers/azure.ts", import.meta.url),
+      new URL("../../src/internal/providers/azure/azure.ts", import.meta.url),
       "utf8",
     );
     expect(source).not.toContain(FORBIDDEN_CAST);
@@ -38,9 +38,9 @@ describe("adapter parameter-cast removal — REQ-FP-3, REQ-FP-4", () => {
 // ---------------------------------------------------------------------------
 
 describe("adapter negative-scope guard — REQ-FP-6", () => {
-  it("openai.ts responses.create body STILL contains Parameters<client.responses.create> cast", async () => {
+  it("openai.responses.ts responses.create body STILL contains Parameters<client.responses.create> cast", async () => {
     const source = await readFile(
-      new URL("../../src/internal/providers/openai.ts", import.meta.url),
+      new URL("../../src/internal/providers/openai/openai.responses.ts", import.meta.url),
       "utf8",
     );
     expect(source).toContain(REQUIRED_CAST);

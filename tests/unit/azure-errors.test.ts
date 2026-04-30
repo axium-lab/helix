@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { AzureFetchError, isAzureFetchError } from "../../src/internal/providers/azure-errors.js";
+import { AzureFetchError, isAzureFetchError } from "../../src/internal/providers/azure/azure-errors.js";
 
 describe("AzureFetchError", () => {
   it("extends Error", () => {

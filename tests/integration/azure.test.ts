@@ -5,7 +5,7 @@ import { createHelix } from "../../src/index.js";
 const env = (k: string): string | undefined => process.env[k];
 const hasAzure =
   !!env("HELIX_AZURE_API_KEY") &&
-  !!env("HELIX_AZURE_ENDPOINT") &&
+  !!env("HELIX_AZURE_BASE_URL") &&
   !!env("HELIX_AZURE_API_VERSION") &&
   !!env("HELIX_AZURE_DEPLOYMENT");
 
@@ -14,7 +14,7 @@ describe.skipIf(!hasAzure)("integration: azure", () => {
     const helix = createHelix({
       provider: "azure",
       apiKey: env("HELIX_AZURE_API_KEY")!,
-      endpoint: env("HELIX_AZURE_ENDPOINT")!,
+      baseUrl: env("HELIX_AZURE_BASE_URL")!,
       apiVersion: env("HELIX_AZURE_API_VERSION")!,
     });
 
@@ -31,7 +31,7 @@ describe.skipIf(!hasAzure)("integration: azure", () => {
     const helix = createHelix({
       provider: "azure",
       apiKey: env("HELIX_AZURE_API_KEY")!,
-      endpoint: env("HELIX_AZURE_ENDPOINT")!,
+      baseUrl: env("HELIX_AZURE_BASE_URL")!,
       apiVersion: env("HELIX_AZURE_API_VERSION")!,
     });
 
@@ -55,7 +55,7 @@ describe.skipIf(!hasAzure)("integration: azure", () => {
     const helix = createHelix({
       provider: "azure",
       apiKey: env("HELIX_AZURE_API_KEY")!,
-      endpoint: env("HELIX_AZURE_ENDPOINT")!,
+      baseUrl: env("HELIX_AZURE_BASE_URL")!,
       apiVersion: env("HELIX_AZURE_API_VERSION")!,
     });
 
@@ -69,7 +69,7 @@ describe.skipIf(!hasAzure)("integration: azure", () => {
       const helix = createHelix({
         provider: "azure",
         apiKey: env("HELIX_AZURE_API_KEY")!,
-        endpoint: env("HELIX_AZURE_ENDPOINT")!,
+        baseUrl: env("HELIX_AZURE_BASE_URL")!,
         apiVersion: env("HELIX_AZURE_API_VERSION")!,
       });
 

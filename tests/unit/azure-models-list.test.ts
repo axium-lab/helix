@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createHelix } from "../../src/index.js";
-import { isAzureFetchError } from "../../src/internal/providers/azure-errors.js";
+import { isAzureFetchError } from "../../src/internal/providers/azure/azure-errors.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -9,7 +9,7 @@ afterEach(() => {
 const BASE_CONFIG = {
   provider: "azure" as const,
   apiKey: "test-api-key",
-  endpoint: "https://my.openai.azure.com",
+  baseUrl: "https://my.openai.azure.com",
   apiVersion: "2024-10-01-preview",
 };
 
@@ -73,7 +73,7 @@ describe("azure models.list — happy path", () => {
     // Endpoint with trailing slash — must be stripped
     const helix = createHelix({
       ...BASE_CONFIG,
-      endpoint: "https://x.azure.com/",
+      baseUrl: "https://x.azure.com/",
       apiVersion: "2024-10-01-preview",
     });
     await helix.models.list();

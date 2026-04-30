@@ -8,7 +8,7 @@ vi.mock("openai", () => {
 });
 
 import { OpenAI } from "openai";
-import { createCustomAdapter } from "../../src/internal/providers/custom.js";
+import { createCustomAdapter } from "../../src/internal/providers/custom/custom.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -123,10 +123,13 @@ describe("createCustomAdapter — files.create throws", () => {
   const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
   it("throws plain Error with exact message", () => {
-    expect(() => adapter.files.create({ file: new Uint8Array([1, 2, 3]) }))
+    expect(() => adapter.files.create({
+      file: new File(["test content"], "test.txt", { type: "text/plain" }),
+      purpose: "assistants",
+    }))
       .toThrow("helix-lib: 'files.create' not supported by provider 'custom'");
     try {
-      adapter.files.create({ file: new Uint8Array([1, 2, 3]) });
+      adapter.files.create({ file: new File(["test content"], "test.txt", { type: "text/plain" }), purpose: "assistants" });
     } catch (e) {
       expect(e instanceof Error).toBe(true);
       expect((e as Error).constructor).toBe(Error);

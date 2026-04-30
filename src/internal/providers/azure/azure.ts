@@ -8,7 +8,7 @@ import { AzureFetchError } from "./azure-errors.js";
 
 // Azure data-plane /openai/deployments listing only works on older preview
 // api-versions. Newer versions (e.g. 2024-10-21, 2025-04-01-preview) return
-// HTTP 404 for this endpoint even though they are valid for inference.
+// HTTP 404 for this base URL even though they are valid for inference.
 // This constant is intentionally decoupled from `config.apiVersion`.
 const AZURE_DEPLOYMENTS_API_VERSION = "2023-03-15-preview";
 
@@ -17,7 +17,7 @@ type AzureConfig = Extract<HelixConfig, { provider: "azure" }>;
 export function createAzureAdapter(config: AzureConfig): Helix {
   const client = new AzureOpenAI({
     apiKey: config.apiKey,
-    endpoint: config.endpoint,
+    baseURL: config.baseUrl,
     apiVersion: config.apiVersion,
   });
 
@@ -48,7 +48,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
     },
     models: {
       async list(): Promise<ModelInfo[]> {
-        const url = `${config.endpoint.replace(/\/$/, "")}/openai/deployments?api-version=${AZURE_DEPLOYMENTS_API_VERSION}`;
+        const url = `${config.baseUrl.replace(/\/$/, "")}/openai/deployments?api-version=${AZURE_DEPLOYMENTS_API_VERSION}`;
         let res: Response;
 
         try {
@@ -76,7 +76,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
         if (res.status === 404) {
           throw new AzureFetchError({
             kind: "config",
-            message: `helix-lib: Azure models.list — deployments listing apiVersion '${AZURE_DEPLOYMENTS_API_VERSION}' rejected by endpoint (HTTP 404). The hardcoded data-plane listing version may have been retired by Microsoft.`,
+            message: `helix-lib: Azure models.list — deployments listing apiVersion '${AZURE_DEPLOYMENTS_API_VERSION}' rejected by base URL '${config.baseUrl}' (HTTP 404). The hardcoded data-plane listing version may have been retired by Microsoft.`,
             status: 404,
             operation: "models.list",
           });

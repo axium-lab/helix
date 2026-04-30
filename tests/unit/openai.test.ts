@@ -8,7 +8,7 @@ vi.mock("openai", () => {
 });
 
 import { OpenAI } from "openai";
-import { createOpenAIAdapter } from "../../src/internal/providers/openai.js";
+import { createOpenAIAdapter } from "../../src/internal/providers/openai/openai.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -156,7 +156,7 @@ describe("createOpenAIAdapter — files.create", () => {
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
     const result = await adapter.files.create({
-      file: new Uint8Array([1, 2, 3]),
+      file: new File(["test content"], "test.txt", { type: "text/plain" }),
       purpose: "assistants",
     });
 
@@ -172,7 +172,8 @@ describe("createOpenAIAdapter — files.create", () => {
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
     const result = await adapter.files.create({
-      file: new Uint8Array([1, 2, 3]),
+      file: new File(["test content"], "test.txt", { type: "text/plain" }),
+      purpose: "assistants",
     });
 
     expect(result.object).toBe("file");

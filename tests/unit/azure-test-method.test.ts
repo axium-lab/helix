@@ -8,7 +8,7 @@ afterEach(() => {
 const BASE_CONFIG = {
   provider: "azure" as const,
   apiKey: "test-api-key",
-  endpoint: "https://my.openai.azure.com",
+  baseUrl: "https://my.openai.azure.com",
   apiVersion: "2024-10-01-preview",
 };
 

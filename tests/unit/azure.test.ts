@@ -8,13 +8,13 @@ vi.mock("openai", () => {
 });
 
 import { AzureOpenAI } from "openai";
-import { createAzureAdapter } from "../../src/internal/providers/azure.js";
+import { createAzureAdapter } from "../../src/internal/providers/azure/azure.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const AZURE_ENDPOINT = "https://my.openai.azure.com";
+const AZURE_BASE_URL = "https://my.openai.azure.com";
 const API_VERSION = "2024-10-01-preview";
 
 const AZURE_RESPONSE_OK = {
@@ -79,15 +79,15 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("createAzureAdapter — SDK client construction", () => {
-  it("constructs AzureOpenAI with { apiKey, endpoint, apiVersion }", () => {
+  it("constructs AzureOpenAI with { apiKey, baseURL, apiVersion }", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
     expect(AzureOpenAI).toHaveBeenCalledWith(
-      expect.objectContaining({ apiKey: "k", endpoint: AZURE_ENDPOINT, apiVersion: API_VERSION }),
+      expect.objectContaining({ apiKey: "k", baseURL: AZURE_BASE_URL, apiVersion: API_VERSION }),
     );
     expect(adapter).toBeDefined();
     expect(typeof adapter.responses.create).toBe("function");
@@ -105,7 +105,7 @@ describe("createAzureAdapter — responses.create", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -126,7 +126,7 @@ describe("createAzureAdapter — responses.create", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -149,12 +149,12 @@ describe("createAzureAdapter — files.create", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
     const result = await adapter.files.create({
-      file: new Uint8Array([1, 2]),
+      file: new File(["test content"], "test.txt", { type: "text/plain" }),
       purpose: "assistants",
     });
 
@@ -173,7 +173,7 @@ describe("createAzureAdapter — files.list", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -190,7 +190,7 @@ describe("createAzureAdapter — files.delete", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -216,7 +216,7 @@ describe("createAzureAdapter — models.list", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -247,7 +247,7 @@ describe("createAzureAdapter — test()", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -265,7 +265,7 @@ describe("createAzureAdapter — test()", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 
@@ -279,7 +279,7 @@ describe("createAzureAdapter — test()", () => {
     const adapter = createAzureAdapter({
       provider: "azure",
       apiKey: "k",
-      endpoint: AZURE_ENDPOINT,
+      baseUrl: AZURE_BASE_URL,
       apiVersion: API_VERSION,
     });
 

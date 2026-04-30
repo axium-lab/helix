@@ -6,6 +6,6 @@ export type VertexCredentials =
 
 export type HelixConfig =
   | { provider: "openai"; apiKey: string; baseUrl?: string }
-  | { provider: "azure"; apiKey: string; endpoint: string; apiVersion: string }
+  | { provider: "azure"; apiKey: string; baseUrl: string; apiVersion: string }
   | { provider: "custom"; apiKey: string; baseUrl: string }
   | { provider: "vertex"; projectId: string; location: string; credentials?: VertexCredentials };
