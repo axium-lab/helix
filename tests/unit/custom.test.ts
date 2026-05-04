@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // vi.mock is hoisted before imports; factory runs at module load.
-vi.mock("openai", () => {
+// importOriginal preserves real APIError/RateLimitError/etc. classes so the
+// HelixError mapper's `instanceof` checks still work — only constructors are mocked.
+vi.mock("openai", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("openai")>();
   const OpenAI = vi.fn();
   const AzureOpenAI = vi.fn();
-  return { default: OpenAI, OpenAI, AzureOpenAI };
+  return { ...actual, default: OpenAI, OpenAI, AzureOpenAI };
 });
 
 import { OpenAI } from "openai";
 import { createCustomAdapter } from "../../src/internal/providers/custom/custom.js";
+import { HelixError } from "../../src/core/errors/helix-error.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -102,16 +106,16 @@ describe("createCustomAdapter — responses.create", () => {
     expect(result.output_text).toBe("Custom response");
   });
 
-  it("error propagation: 403 from custom endpoint propagates raw", async () => {
+  it("error mapped to HelixError when SDK throws", async () => {
     mockResponsesCreate.mockRejectedValue(new Error("403 Forbidden"));
     const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
-    await expect(
-      adapter.responses.create({
-        model: "local-model",
-        input: [{ role: "user", content: [{ type: "input_text", text: "Hello" }] }],
-      }),
-    ).rejects.toBeDefined();
+    const promise = adapter.responses.create({
+      model: "local-model",
+      input: [{ role: "user", content: [{ type: "input_text", text: "Hello" }] }],
+    });
+    await expect(promise).rejects.toBeInstanceOf(HelixError);
+    await expect(promise).rejects.toMatchObject({ provider: "custom", category: "unknown" });
   });
 });
 
@@ -119,10 +123,10 @@ describe("createCustomAdapter — responses.create", () => {
 // describe: files.* throw stubs (REQ-CUSTOM-004)
 // ---------------------------------------------------------------------------
 
-describe("createCustomAdapter — files.create throws", () => {
+describe("createCustomAdapter — files.create throws HelixError(invalid_request)", () => {
   const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
-  it("throws plain Error with exact message", () => {
+  it("throws HelixError with category=invalid_request and exact message", () => {
     expect(() => adapter.files.create({
       file: new File(["test content"], "test.txt", { type: "text/plain" }),
       purpose: "assistants",
@@ -131,38 +135,48 @@ describe("createCustomAdapter — files.create throws", () => {
     try {
       adapter.files.create({ file: new File(["test content"], "test.txt", { type: "text/plain" }), purpose: "assistants" });
     } catch (e) {
-      expect(e instanceof Error).toBe(true);
-      expect((e as Error).constructor).toBe(Error);
+      expect(e).toBeInstanceOf(HelixError);
+      if (e instanceof HelixError) {
+        expect(e.category).toBe("invalid_request");
+        expect(e.provider).toBe("custom");
+        expect(e.meta?.reason).toBe("not_supported");
+      }
     }
   });
 });
 
-describe("createCustomAdapter — files.list throws", () => {
+describe("createCustomAdapter — files.list throws HelixError(invalid_request)", () => {
   const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
-  it("throws plain Error with exact message", () => {
+  it("throws HelixError with category=invalid_request and exact message", () => {
     expect(() => adapter.files.list())
       .toThrow("helix-lib: 'files.list' not supported by provider 'custom'");
     try {
       adapter.files.list();
     } catch (e) {
-      expect(e instanceof Error).toBe(true);
-      expect((e as Error).constructor).toBe(Error);
+      expect(e).toBeInstanceOf(HelixError);
+      if (e instanceof HelixError) {
+        expect(e.category).toBe("invalid_request");
+        expect(e.meta?.operation).toBe("files.list");
+      }
     }
   });
 });
 
-describe("createCustomAdapter — files.delete throws", () => {
+describe("createCustomAdapter — files.delete throws HelixError(invalid_request)", () => {
   const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
-  it("throws plain Error with exact message", () => {
+  it("throws HelixError with category=invalid_request and exact message", () => {
     expect(() => adapter.files.delete("file-x"))
       .toThrow("helix-lib: 'files.delete' not supported by provider 'custom'");
     try {
       adapter.files.delete("file-x");
     } catch (e) {
-      expect(e instanceof Error).toBe(true);
-      expect((e as Error).constructor).toBe(Error);
+      expect(e).toBeInstanceOf(HelixError);
+      if (e instanceof HelixError) {
+        expect(e.category).toBe("invalid_request");
+        expect(e.meta?.operation).toBe("files.delete");
+      }
     }
   });
 });
@@ -184,11 +198,13 @@ describe("createCustomAdapter — models.list", () => {
     expect(typeof result[0].id).toBe("string");
   });
 
-  it("error propagation: raw SDK error propagates", async () => {
+  it("error mapped to HelixError when SDK throws", async () => {
     mockModelsList.mockRejectedValue(new Error("401 Unauthorized"));
     const adapter = createCustomAdapter({ provider: "custom", apiKey: "key-abc", baseUrl: BASE_URL });
 
-    await expect(adapter.models.list()).rejects.toBeDefined();
+    const promise = adapter.models.list();
+    await expect(promise).rejects.toBeInstanceOf(HelixError);
+    await expect(promise).rejects.toMatchObject({ provider: "custom", category: "unknown" });
   });
 });
 

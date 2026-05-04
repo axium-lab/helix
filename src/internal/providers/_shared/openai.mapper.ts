@@ -37,17 +37,17 @@ export function toOpenAIParams(
     max_output_tokens: params.max_output_tokens,
     text: params.text
       ? {
-          format: params.text.format
-            ? params.text.format.type === "json_schema"
-              ? {
-                  type: "json_schema",
-                  name: params.text.format.name,
-                  schema: params.text.format.schema as Record<string, unknown>,
-                  strict: params.text.format.strict,
-                }
-              : { type: params.text.format.type }
-            : undefined,
-        }
+        format: params.text.format
+          ? params.text.format.type === "json_schema"
+            ? {
+              type: "json_schema",
+              name: params.text.format.name,
+              schema: params.text.format.schema as Record<string, unknown>,
+              strict: params.text.format.strict,
+            }
+            : { type: params.text.format.type }
+          : undefined,
+      }
       : undefined,
     stream: false,
   };

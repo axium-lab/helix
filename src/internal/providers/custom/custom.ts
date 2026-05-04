@@ -3,7 +3,8 @@ import type { HelixConfig } from "../../../core/types/config.js";
 import type { Helix } from "../../../createHelix.js";
 import type { ModelInfo } from "../../../core/types/models.js";
 import { HelixObject } from "../../../core/types/helix-object.js";
-import { toHelixResponse, toOpenAIParams } from "../_shared/openai-shape.mappers.js";
+import { toHelixResponse, toOpenAIParams } from "../_shared/openai.mapper.js";
+import { customNotSupportedError, mapCustomError } from "./custom.errors.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
@@ -16,32 +17,40 @@ export function createCustomAdapter(config: CustomConfig): Helix {
   return {
     responses: {
       async create(params) {
-        const raw = await client.responses.create(toOpenAIParams(params));
-        return toHelixResponse(raw);
+        try {
+          const raw = await client.responses.create(toOpenAIParams(params));
+          return toHelixResponse(raw);
+        } catch (err) {
+          throw mapCustomError(err);
+        }
       },
     },
     files: {
       create(_params): Promise<never> {
-        throw new Error("helix-lib: 'files.create' not supported by provider 'custom'");
+        throw customNotSupportedError("files.create");
       },
       list(): Promise<never> {
-        throw new Error("helix-lib: 'files.list' not supported by provider 'custom'");
+        throw customNotSupportedError("files.list");
       },
       delete(_id): Promise<never> {
-        throw new Error("helix-lib: 'files.delete' not supported by provider 'custom'");
+        throw customNotSupportedError("files.delete");
       },
     },
     models: {
       async list() {
-        const page = await client.models.list();
-        return page.data.map((m) => ({
-          id: m.id,
-          object: HelixObject.Model,
-          type: undefined,
-          created: m.created,
-          tools: [], // Custom provider doesn't support tools, so we return an empty array
-          owned_by: m.owned_by,
-        })) as ModelInfo[];
+        try {
+          const page = await client.models.list();
+          return page.data.map((m) => ({
+            id: m.id,
+            object: HelixObject.Model,
+            type: undefined,
+            created: m.created,
+            tools: [], // Custom provider doesn't support tools, so we return an empty array
+            owned_by: m.owned_by,
+          })) as ModelInfo[];
+        } catch (err) {
+          throw mapCustomError(err);
+        }
       },
     },
     async test() {

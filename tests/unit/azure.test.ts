@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // vi.mock is hoisted before imports; factory runs at module load.
-vi.mock("openai", () => {
+// importOriginal preserves real APIError/RateLimitError/etc. classes so the
+// HelixError mapper's `instanceof` checks still work — only constructors are mocked.
+vi.mock("openai", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("openai")>();
   const OpenAI = vi.fn();
   const AzureOpenAI = vi.fn();
-  return { default: OpenAI, OpenAI, AzureOpenAI };
+  return { ...actual, default: OpenAI, OpenAI, AzureOpenAI };
 });
 
 import { AzureOpenAI } from "openai";
 import { createAzureAdapter } from "../../src/internal/providers/azure/azure.js";
+import { HelixError } from "../../src/core/errors/helix-error.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -121,7 +125,7 @@ describe("createAzureAdapter — responses.create", () => {
     expect(result.object).toBe("response");
   });
 
-  it("error propagation: 401 from Azure propagates raw", async () => {
+  it("error mapped to HelixError when SDK throws", async () => {
     mockResponsesCreate.mockRejectedValue(new Error("401 Unauthorized"));
     const adapter = createAzureAdapter({
       provider: "azure",
@@ -130,12 +134,12 @@ describe("createAzureAdapter — responses.create", () => {
       apiVersion: API_VERSION,
     });
 
-    await expect(
-      adapter.responses.create({
-        model: "gpt-4o-deployment",
-        input: [{ role: "user", content: [{ type: "input_text", text: "Hello" }] }],
-      }),
-    ).rejects.toBeDefined();
+    const promise = adapter.responses.create({
+      model: "gpt-4o-deployment",
+      input: [{ role: "user", content: [{ type: "input_text", text: "Hello" }] }],
+    });
+    await expect(promise).rejects.toBeInstanceOf(HelixError);
+    await expect(promise).rejects.toMatchObject({ provider: "azure", category: "unknown" });
   });
 });
 

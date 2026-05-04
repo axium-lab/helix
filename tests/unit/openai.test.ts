@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // vi.mock is hoisted before imports; factory runs at module load.
-vi.mock("openai", () => {
+// importOriginal preserves real APIError/RateLimitError/etc. classes so the
+// HelixError mapper's `instanceof` checks still work — only constructors are mocked.
+// `default` and `OpenAI` MUST point to the SAME spy: the adapter imports default,
+// the test sets mockImplementation on the named export.
+vi.mock("openai", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("openai")>();
   const OpenAI = vi.fn();
   const AzureOpenAI = vi.fn();
-  return { default: OpenAI, OpenAI, AzureOpenAI };
+  return { ...actual, default: OpenAI, OpenAI, AzureOpenAI };
 });
 
 import { OpenAI } from "openai";
 import { createOpenAIAdapter } from "../../src/internal/providers/openai/openai.js";
+import { HelixError } from "../../src/core/errors/helix-error.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -133,7 +139,7 @@ describe("createOpenAIAdapter — responses.create", () => {
     expect(result.usage).toMatchObject({ input_tokens: 10, output_tokens: 5, total_tokens: 15 });
   });
 
-  it("error passthrough: raw SDK error propagates on 401", async () => {
+  it("error mapped to HelixError when SDK throws", async () => {
     mockResponsesCreate.mockRejectedValue(new Error("401 Unauthorized"));
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
@@ -142,7 +148,7 @@ describe("createOpenAIAdapter — responses.create", () => {
         model: "gpt-4o",
         input: [{ role: "user", content: [{ type: "input_text", text: "Hello" }] }],
       }),
-    ).rejects.toBeDefined();
+    ).rejects.toBeInstanceOf(HelixError);
   });
 });
 
@@ -224,11 +230,13 @@ describe("createOpenAIAdapter — models.list", () => {
     expect(typeof result[0].id).toBe("string");
   });
 
-  it("error propagation: error from SDK propagates raw", async () => {
+  it("error mapped to HelixError when SDK throws", async () => {
     mockModelsList.mockRejectedValue(new Error("401 Invalid API key"));
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
-    await expect(adapter.models.list()).rejects.toBeDefined();
+    const promise = adapter.models.list();
+    await expect(promise).rejects.toBeInstanceOf(HelixError);
+    await expect(promise).rejects.toMatchObject({ provider: "openai", category: "unknown" });
   });
 });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createHelix } from "../../src/index.js";
-import { isAzureFetchError } from "../../src/internal/providers/azure/azure-errors.js";
+import { isHelixError } from "../../src/core/errors/helix-error.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -114,7 +114,7 @@ function makeErrorResponse(status: number) {
 }
 
 describe("azure models.list — error branches", () => {
-  it("HTTP 401 → AzureFetchError kind:auth", async () => {
+  it("HTTP 401 → HelixError category=auth_error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => makeErrorResponse(401)));
 
     const helix = createHelix(BASE_CONFIG);
@@ -122,37 +122,37 @@ describe("azure models.list — error branches", () => {
       await helix.models.list();
       expect.fail("Should have thrown");
     } catch (err) {
-      expect(isAzureFetchError(err)).toBe(true);
-      if (isAzureFetchError(err)) {
-        expect(err.kind).toBe("auth");
-        expect(err.status).toBe(401);
-        expect(err.operation).toBe("models.list");
+      expect(isHelixError(err)).toBe(true);
+      if (isHelixError(err)) {
+        expect(err.category).toBe("auth_error");
+        expect(err.httpStatus).toBe(401);
         expect(err.provider).toBe("azure");
+        expect(err.meta?.operation).toBe("models.list");
         expect(err.message).toBe("helix-lib: Azure models.list — invalid api-key (HTTP 401)");
       }
     }
   });
 
-  it("HTTP 404 → AzureFetchError kind:config referencing the hardcoded listing apiVersion", async () => {
+  it("HTTP 404 → HelixError category=not_found, message references the hardcoded listing apiVersion", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => makeErrorResponse(404)));
 
-    const helix = createHelix({ ...BASE_CONFIG, apiVersion: "2024-10-01-preview" });
+    const helixSdk = createHelix({ ...BASE_CONFIG, apiVersion: "2024-10-01-preview" });
     try {
-      await helix.models.list();
+      await helixSdk.models.list();
       expect.fail("Should have thrown");
     } catch (err) {
-      expect(isAzureFetchError(err)).toBe(true);
-      if (isAzureFetchError(err)) {
-        expect(err.kind).toBe("config");
-        expect(err.status).toBe(404);
-        expect(err.operation).toBe("models.list");
+      expect(isHelixError(err)).toBe(true);
+      if (isHelixError(err)) {
+        expect(err.category).toBe("not_found");
+        expect(err.httpStatus).toBe(404);
+        expect(err.meta?.operation).toBe("models.list");
         expect(err.message).toContain("2023-03-15-preview");
         expect(err.message).toContain("HTTP 404");
       }
     }
   });
 
-  it("HTTP 500 → AzureFetchError kind:upstream with status 500", async () => {
+  it("HTTP 500 → HelixError category=server_error with httpStatus 500", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => makeErrorResponse(500)));
 
     const helix = createHelix(BASE_CONFIG);
@@ -160,16 +160,16 @@ describe("azure models.list — error branches", () => {
       await helix.models.list();
       expect.fail("Should have thrown");
     } catch (err) {
-      expect(isAzureFetchError(err)).toBe(true);
-      if (isAzureFetchError(err)) {
-        expect(err.kind).toBe("upstream");
-        expect(err.status).toBe(500);
+      expect(isHelixError(err)).toBe(true);
+      if (isHelixError(err)) {
+        expect(err.category).toBe("server_error");
+        expect(err.httpStatus).toBe(500);
         expect(err.message).toContain("500");
       }
     }
   });
 
-  it("HTTP 429 → AzureFetchError kind:upstream with status 429", async () => {
+  it("HTTP 429 → HelixError category=rate_limit with httpStatus 429", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => makeErrorResponse(429)));
 
     const helix = createHelix(BASE_CONFIG);
@@ -177,16 +177,16 @@ describe("azure models.list — error branches", () => {
       await helix.models.list();
       expect.fail("Should have thrown");
     } catch (err) {
-      expect(isAzureFetchError(err)).toBe(true);
-      if (isAzureFetchError(err)) {
-        expect(err.kind).toBe("upstream");
-        expect(err.status).toBe(429);
+      expect(isHelixError(err)).toBe(true);
+      if (isHelixError(err)) {
+        expect(err.category).toBe("rate_limit");
+        expect(err.httpStatus).toBe(429);
         expect(err.message).toContain("429");
       }
     }
   });
 
-  it("fetch rejection → AzureFetchError kind:network with original cause", async () => {
+  it("fetch rejection → HelixError category=connection_error with original cause", async () => {
     const originalError = new TypeError("fetch failed");
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.reject(originalError)));
 
@@ -195,9 +195,9 @@ describe("azure models.list — error branches", () => {
       await helix.models.list();
       expect.fail("Should have thrown");
     } catch (err) {
-      expect(isAzureFetchError(err)).toBe(true);
-      if (isAzureFetchError(err)) {
-        expect(err.kind).toBe("network");
+      expect(isHelixError(err)).toBe(true);
+      if (isHelixError(err)) {
+        expect(err.category).toBe("connection_error");
         expect(err.cause).toBe(originalError);
         expect(err.message).toBe("helix-lib: Azure models.list — network error (see cause)");
       }
