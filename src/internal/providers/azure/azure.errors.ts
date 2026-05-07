@@ -5,11 +5,24 @@ import { mapSdkError } from "../_shared/openai-sdk-error.mapper.js";
 
 const PROVIDER = "azure" as const;
 
+/*  
+ Cuando el SDK hace el request contra Azure, la respuesta siempre viene con x-ms-request-id — lo pone el servicio Azure OpenAI en cada respuesta, sin
+  excepción.
+  1. x-ms-request-id — header estándar de Azure REST API                                                                                                    
+  2. apim-request-id — header de Azure API Management (APIM) Es el gateway más común para clientes de Azure, aunque no es universal 
+  (ej: Azure OpenAI Service no lo incluye en errores de autenticación).
+  3. x-request-id — fallback al default del SDK de OpenAI (err.requestID)   
+*/
 export function mapAzureError(err: unknown): HelixError {
   return mapSdkError(err, {
     provider: PROVIDER,
     buildMeta: buildAzureMeta,
     detectResponsibleAIViolation: isResponsibleAIViolation,
+    buildRequestId: (err) =>
+      err.headers?.get("x-ms-request-id") ??
+      err.headers?.get("apim-request-id") ??
+      err.requestID ??
+      undefined,
   });
 }
 

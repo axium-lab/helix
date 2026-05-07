@@ -37,6 +37,8 @@ export type ProviderErrorConfig = {
   buildMeta: (err: APIError) => Record<string, unknown> | undefined;
   // Detecta contenido inapropiado  Azure Responsible AI Policy Violation
   detectResponsibleAIViolation?: (err: APIError, code: string | undefined) => boolean;
+  // Override para providers que usan headers distintos a x-request-id (ej: Azure)
+  buildRequestId?: (err: APIError) => string | undefined;
 };
 
 export function mapSdkError(err: unknown, cfg: ProviderErrorConfig): HelixError {
@@ -95,12 +97,16 @@ function mapAPIError(err: APIError, cfg: ProviderErrorConfig): HelixError {
   const category = categorize(err, code, cfg);
   const meta = cfg.buildMeta(err);
 
+  const requestId = cfg.buildRequestId
+    ? cfg.buildRequestId(err)
+    : (err.requestID ?? undefined);
+
   return new HelixError({
     category,
     provider: cfg.provider,
     message: err.message,
     httpStatus: err.status,
-    requestId: err.requestID ?? undefined,
+    requestId,
     meta,
     cause: err,
   });
