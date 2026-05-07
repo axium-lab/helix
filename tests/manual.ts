@@ -1,26 +1,33 @@
+import { HelixConfig } from "../src/core/index.js";
 import { createHelix } from "../src/createHelix.js";
 import { runErrorScenarios } from "./manual-errors.js";
 
 // AZURE
-// const apiKey = process.env.HELIX_AZURE_API_KEY!;
-// const helix = createHelix({ provider: "azure", apiKey, baseUrl: process.env.HELIX_AZURE_BASE_URL!, apiVersion: process.env.HELIX_AZURE_API_VERSION! });
+const config: HelixConfig = {
+  provider: "azure",
+  apiKey: process.env.HELIX_AZURE_API_KEY!,
+  baseUrl: process.env.HELIX_AZURE_BASE_URL!,
+  apiVersion: process.env.HELIX_AZURE_API_VERSION!
+};
 
 // OPENAI
-const apiKey = process.env.HELIX_OPENAI_API_KEY!;
-const helix = createHelix({ provider: "openai", apiKey });
+// const config: HelixConfig = {
+//   provider: "openai",
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!
+// };
+
+const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-const ok = await helix.test();
-console.log("test:", ok);
+// const ok = await helix.test();
+// console.log("test:", ok);
 
 const models = await helix.models.list();
 console.log("models:", models.map((m) => m.id));
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-
-
-await runErrorScenarios(helix, apiKey);
+// await runErrorScenarios(helix, config);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
