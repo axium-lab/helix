@@ -67,34 +67,41 @@ type HelixFinishReason =
   | "stop_sequence"  // hit a stop sequence (Anthropic, future)
   | "tool_use"       // model paused to call a tool (future: helix-tools)
   | "content_filter" // blocked by content policy
-  | "refusal"        // model refused to answer (future)
+  | "refusal"        // model refused to answer
   | "error"          // request failed
 ```
 
 `null` means the response is still `in_progress` (streaming or async, not yet finished).
 
-`stop_sequence` and `refusal` are reserved for future providers (Anthropic, Vertex). They have no
-mapping from the OpenAI Responses API today.
+`stop_sequence` and `tool_use` are reserved for future providers. They have no mapping from the
+OpenAI Responses API today.
 
 **Mapping from OpenAI Responses API:**
 
-| `status` | `incomplete_details.reason` | `finish_reason` |
-|---|---|---|
-| `completed` | — | `end_turn` |
-| `incomplete` | `max_output_tokens` | `max_tokens` |
-| `incomplete` | `content_filter` | `content_filter` |
-| `incomplete` | anything else | `end_turn` (defensive) |
-| `failed` | — | `error` |
-| `cancelled` | — | `error` |
-| `in_progress` | — | `null` |
-| `queued` | — | `null` |
+| `status` | `incomplete_details.reason` | output contains refusal | `finish_reason` |
+|---|---|---|---|
+| `completed` | — | no | `end_turn` |
+| `completed` | — | yes | `refusal` |
+| `incomplete` | `max_output_tokens` | — | `max_tokens` |
+| `incomplete` | `content_filter` | — | `content_filter` |
+| `incomplete` | anything else | — | `end_turn` (defensive) |
+| `failed` | — | — | `error` |
+| `cancelled` | — | — | `error` |
+| `in_progress` | — | — | `null` |
+| `queued` | — | — | `null` |
 
-### `metadata: { provider: unknown }`
+### `metadata: Partial<Record<HelixProviderKind, unknown>>`
 
-Passthrough of the raw upstream SDK response object. Consumers who need OpenAI-specific fields
+Passthrough of the raw upstream SDK response object, keyed by the actual provider name
+(`openai`, `azure`, `custom`, `vertex`). Consumers who need provider-specific fields
 (billing, prompt cache key, service tier, etc.) can cast and access them without Helix being in the
 way. Typed as `unknown` rather than `any` — the consumer must assert before use, which is the
 correct TypeScript discipline for an opaque payload.
+
+```ts
+// example
+const raw = response.metadata.openai;  // OpenAI SDK response object
+```
 
 ## Consequences
 
@@ -102,6 +109,6 @@ correct TypeScript discipline for an opaque payload.
 - When `helix-tools` lands, `finish_reason: "tool_use"` slots in with no shape change to `HelixResponse`.
 - When Anthropic/Vertex providers land, their mappers populate `stop_sequence` and `refusal` from
   native fields — consumers see uniform values regardless of provider.
-- `metadata.provider` gives an escape hatch without polluting the normalized contract.
+- `metadata[provider]` gives an escape hatch without polluting the normalized contract. The key is the provider name, making it self-documenting.
 - Future providers MUST map their native stop/finish signal to `HelixFinishReason`. The mapping
   lives in the provider's `to{Provider}Response` mapper, never in adapter code.
