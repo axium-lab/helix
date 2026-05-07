@@ -56,6 +56,3 @@ export function isHelixError(value: unknown): value is HelixError {
   return value instanceof HelixError;
 }
 
-export function toHttpStatus(err: HelixError): number {
-  return err.httpStatus;
-}

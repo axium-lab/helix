@@ -34,5 +34,5 @@ export type { ModelInfo } from "./types/models.js";
 
 export { HelixObject } from "./types/helix-object.js";
 
-export { HelixError, isHelixError, toHttpStatus } from "./errors/helix-error.js";
+export { HelixError, isHelixError } from "./errors/helix-error.js";
 export type { HelixErrorCategory, HelixErrorArgs } from "./errors/helix-error.js";

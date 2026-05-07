@@ -27,5 +27,5 @@ export type {
 
 export { HelixObject } from "./core/index.js";
 
-export { HelixError, isHelixError, toHttpStatus } from "./core/index.js";
+export { HelixError, isHelixError } from "./core/index.js";
 export type { HelixErrorCategory, HelixErrorArgs } from "./core/index.js";

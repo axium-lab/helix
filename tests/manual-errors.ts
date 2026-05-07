@@ -1,6 +1,6 @@
 import { createHelix, type Helix } from "../src/createHelix.js";
 import type { HelixConfig } from "../src/core/types/config.js";
-import { HelixError, isHelixError, toHttpStatus } from "../src/core/errors/helix-error.js";
+import { HelixError, isHelixError } from "../src/core/errors/helix-error.js";
 
 function printError(label: string, err: unknown) {
   if (isHelixError(err)) {
