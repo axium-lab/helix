@@ -35,6 +35,7 @@ import {
 export type ProviderErrorConfig = {
   provider: HelixProviderKind;
   buildMeta: (err: APIError) => Record<string, unknown> | undefined;
+  // Detecta contenido inapropiado  Azure Responsible AI Policy Violation
   detectResponsibleAIViolation?: (err: APIError, code: string | undefined) => boolean;
 };
 
@@ -110,12 +111,14 @@ function categorize(
   code: string | undefined,
   cfg: ProviderErrorConfig,
 ): HelixErrorCategory {
+
   if (err instanceof BadRequestError) {
     const isContentFilter = cfg.detectResponsibleAIViolation
       ? cfg.detectResponsibleAIViolation(err, code)
       : code === "content_filter";
     return isContentFilter ? "content_filter" : "invalid_request";
   }
+
   if (err instanceof AuthenticationError) return "auth_error";
   if (err instanceof PermissionDeniedError) return "permission_denied";
   if (err instanceof NotFoundError) return "not_found";
