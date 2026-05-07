@@ -38,7 +38,7 @@ export type HelixResponseStatus =
   | "in_progress"
   | "failed";
 
-// TODO top_sequence, tool_use y refusal "reservados para cuando se implementen las tools, cuando expongamos stopen los params"
+// stop_sequence y tool_use reservados: stop_sequence para cuando expongamos stop en params, tool_use para helix-tools
 export type HelixFinishReason =
   | "end_turn"
   | "max_tokens"
