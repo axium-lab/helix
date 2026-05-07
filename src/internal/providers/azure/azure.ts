@@ -80,11 +80,13 @@ export function createAzureAdapter(config: AzureConfig): Helix {
             cause: err,
           });
         }
+        const azureRequestId = res.headers.get("x-ms-request-id") ?? res.headers.get("apim-request-id") ?? undefined;
         if (res.status === 401) {
           throw azureFetchHttpError({
             status: 401,
             operation: "models.list",
             message: "helix-lib: Azure models.list — invalid api-key (HTTP 401)",
+            requestId: azureRequestId,
           });
         }
         if (res.status === 404) {
@@ -92,6 +94,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
             status: 404,
             operation: "models.list",
             message: `helix-lib: Azure models.list — deployments listing apiVersion '${AZURE_DEPLOYMENTS_API_VERSION}' rejected by base URL '${config.baseUrl}' (HTTP 404). The hardcoded data-plane listing version may have been retired by Microsoft.`,
+            requestId: azureRequestId,
           });
         }
         if (!res.ok) {
@@ -99,6 +102,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
             status: res.status,
             operation: "models.list",
             message: `helix-lib: Azure models.list — failed to fetch deployments: ${res.status} ${res.statusText}`,
+            requestId: azureRequestId,
           });
         }
         const data = (await res.json()) as { data?: Array<{ id: string }> };

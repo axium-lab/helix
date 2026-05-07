@@ -59,6 +59,7 @@ export function azureFetchHttpError(args: {
   operation: string;
   message: string;
   body?: unknown;
+  requestId?: string;
 }): HelixError {
   const meta: Record<string, unknown> = { operation: args.operation };
   if (args.body !== undefined) meta.body = args.body;
@@ -67,6 +68,7 @@ export function azureFetchHttpError(args: {
     provider: PROVIDER,
     message: args.message,
     httpStatus: args.status,
+    requestId: args.requestId,
     meta,
   });
 }
