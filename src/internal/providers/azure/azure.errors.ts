@@ -14,39 +14,28 @@ const PROVIDER = "azure" as const;
   3. x-request-id — fallback al default del SDK de OpenAI (err.requestID)   
 */
 export function mapAzureError(err: unknown): HelixError {
-  return mapSdkError(err, {
-    provider: PROVIDER,
-    buildMeta: buildAzureMeta,
-    detectResponsibleAIViolation: isResponsibleAIViolation,
-    buildRequestId: (err) =>
-      err.headers?.get("x-ms-request-id") ??
-      err.headers?.get("apim-request-id") ??
-      err.requestID ??
-      undefined,
-  });
+
+  return mapSdkError(
+    err,
+    {
+      provider: PROVIDER,
+      buildMeta: buildAzureMeta,
+      detectResponsibleAIViolation: isResponsibleAIViolation,
+      buildRequestId: (err) =>
+        err.headers?.get("x-ms-request-id") ??
+        err.headers?.get("apim-request-id") ??
+        err.requestID ??
+        undefined,
+    });
 }
 
 function buildAzureMeta(err: APIError): Record<string, unknown> | undefined {
-  const meta: Record<string, unknown> = {};
-  if (err.error !== undefined) meta.body = err.error as unknown;
-  const innererror = extractInnererror(err.error);
-  if (innererror) meta.innererror = innererror;
-  return Object.keys(meta).length > 0 ? meta : undefined;
+  if (err.error === undefined) return undefined;
+  return { body: err.error as unknown };
 }
 
-function isResponsibleAIViolation(err: APIError, code: string | undefined): boolean {
-  if (code === "content_filter") return true;
-  const innererror = extractInnererror(err.error);
-  return innererror?.code === "ResponsibleAIPolicyViolation";
-}
-
-function extractInnererror(body: unknown): { code?: string; message?: string } | undefined {
-  if (typeof body !== "object" || body === null) return undefined;
-  const i = (body as Record<string, unknown>).innererror;
-  if (typeof i === "object" && i !== null) {
-    return i as { code?: string; message?: string };
-  }
-  return undefined;
+function isResponsibleAIViolation(_err: APIError, code: string | undefined): boolean {
+  return code === "content_filter";
 }
 
 // ---------------------------------------------------------------------------
