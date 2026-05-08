@@ -74,39 +74,31 @@ export function createAzureAdapter(config: AzureConfig): Helix {
             },
           });
         } catch (err) {
+          // Solo entramos aquí por errores de red (p. ej. DNS, timeout, CORS).
           throw azureFetchNetworkError({
             operation: "models.list",
             message: "helix-lib: Azure models.list — network error (see cause)",
             cause: err,
           });
         }
+
         const azureRequestId = res.headers.get("x-ms-request-id") ?? res.headers.get("apim-request-id") ?? undefined;
-        if (res.status === 401) {
-          throw azureFetchHttpError({
-            status: 401,
-            operation: "models.list",
-            message: "helix-lib: Azure models.list — invalid api-key (HTTP 401)",
-            requestId: azureRequestId,
-          });
-        }
-        if (res.status === 404) {
-          throw azureFetchHttpError({
-            status: 404,
-            operation: "models.list",
-            message: `helix-lib: Azure models.list — deployments listing apiVersion '${AZURE_DEPLOYMENTS_API_VERSION}' rejected by base URL '${config.baseUrl}' (HTTP 404). The hardcoded data-plane listing version may have been retired by Microsoft.`,
-            requestId: azureRequestId,
-          });
-        }
+
         if (!res.ok) {
-          throw azureFetchHttpError({
-            status: res.status,
-            operation: "models.list",
-            message: `helix-lib: Azure models.list — failed to fetch deployments: ${res.status} ${res.statusText}`,
-            requestId: azureRequestId,
-          });
+          const message =
+            res.status === 401 ?
+              "helix-lib: Azure models.list — invalid api-key (HTTP 401)" :
+              res.status === 404 ?
+                `helix-lib: Azure models.list — deployments listing apiVersion '${AZURE_DEPLOYMENTS_API_VERSION}' rejected by base URL '${config.baseUrl}' (HTTP 404). The hardcoded data-plane listing version may have been retired by Microsoft.`
+                :
+                `helix-lib: Azure models.list — failed to fetch deployments: ${res.status} ${res.statusText}`;
+
+          throw azureFetchHttpError({ status: res.status, operation: "models.list", message, requestId: azureRequestId });
         }
+
         const data = (await res.json()) as { data?: Array<{ id: string }> };
         const deployments = data.data ?? [];
+
         return deployments
           .map((d) => ({
             id: d.id,
