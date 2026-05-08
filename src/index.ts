@@ -4,7 +4,6 @@ export type { Helix } from "./createHelix.js";
 export type {
   HelixConfig,
   HelixProviderKind,
-  VertexCredentials,
   ResponsesCreateParams,
   HelixResponse,
   HelixResponseStatus,

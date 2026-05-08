@@ -7,7 +7,7 @@ import type { ModelInfo } from "./core/types/models.js";
 import { createOpenAIAdapter } from "./internal/providers/openai/openai.js";
 import { createAzureAdapter } from "./internal/providers/azure/azure.js";
 import { createCustomAdapter } from "./internal/providers/custom/custom.js";
-import { createVertexAdapter } from "./internal/providers/vertex/vertex.js";
+import { createGoogleAdapter } from "./internal/providers/google/google.js";
 
 export interface Helix {
   responses: {
@@ -32,7 +32,7 @@ export function createHelix(config: HelixConfig): Helix {
       return createAzureAdapter(config);
     case "custom":
       return createCustomAdapter(config);
-    case "vertex":
-      return createVertexAdapter(config);
+    case "google":
+      return createGoogleAdapter(config);
   }
 }

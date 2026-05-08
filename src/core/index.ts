@@ -1,6 +1,5 @@
 export type {
   HelixProviderKind,
-  VertexCredentials,
   HelixConfig,
 } from "./types/config.js";
 
