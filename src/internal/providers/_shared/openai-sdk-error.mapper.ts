@@ -42,47 +42,22 @@ export type ProviderErrorConfig = {
 };
 
 export function mapSdkError(err: unknown, cfg: ProviderErrorConfig): HelixError {
+
   if (isHelixError(err)) return err;
+  if (err instanceof APIConnectionTimeoutError)
+    return defaultHelixError("timeout", err, cfg);
 
-  if (err instanceof APIConnectionTimeoutError) {
-    return new HelixError({
-      category: "timeout",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof APIConnectionError)
+    return defaultHelixError("connection_error", err, cfg);
 
-  if (err instanceof APIConnectionError) {
-    return new HelixError({
-      category: "connection_error",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof APIUserAbortError)
+    return defaultHelixError("unknown", err, cfg);
 
-  if (err instanceof APIUserAbortError) {
-    return new HelixError({
-      category: "unknown",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
-
-  if (err instanceof APIError) {
+  if (err instanceof APIError)
     return mapAPIError(err, cfg);
-  }
 
-  if (err instanceof Error) {
-    return new HelixError({
-      category: "unknown",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof Error)
+    return defaultHelixError("unknown", err, cfg);
 
   return new HelixError({
     category: "unknown",
@@ -90,6 +65,10 @@ export function mapSdkError(err: unknown, cfg: ProviderErrorConfig): HelixError 
     message: "helix-lib: unknown error",
     cause: err,
   });
+}
+
+function defaultHelixError(category: HelixErrorCategory, err: Error, cfg: ProviderErrorConfig): HelixError {
+  return new HelixError({ category, provider: cfg.provider, message: err.message, cause: err });
 }
 
 function mapAPIError(err: APIError, cfg: ProviderErrorConfig): HelixError {
