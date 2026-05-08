@@ -10,24 +10,31 @@ import { runErrorScenarios } from "./manual-errors.js";
 //   apiVersion: process.env.HELIX_AZURE_API_VERSION!
 // };
 
-// OPENAI
+// GOOGLE
 const config: HelixConfig = {
-  provider: "openai",
-  apiKey: process.env.HELIX_OPENAI_API_KEY!
+  provider: "google",
+  apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+  baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
 };
+
+// // OPENAI
+// const config: HelixConfig = {
+//   provider: "openai",
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!
+// };
 
 const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-// const ok = await helix.test();
-// console.log("test:", ok);
+const ok = await helix.test();
+console.log("test:", ok);
 
-// const models = await helix.models.list();
-// console.log("models:", models.map((m) => m.id));
+const models = await helix.models.list();
+console.log("models:", models);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-await runErrorScenarios(helix, config);
+// await runErrorScenarios(helix, config);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
