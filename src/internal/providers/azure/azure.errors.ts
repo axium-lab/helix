@@ -31,7 +31,7 @@ export function mapAzureError(err: unknown): HelixError {
 
 function buildAzureMeta(err: APIError): Record<string, unknown> | undefined {
   if (err.error === undefined) return undefined;
-  return { body: err.error as unknown };
+  return { body: err.error };
 }
 
 function isResponsibleAIViolation(_err: APIError, code: string | undefined): boolean {
@@ -76,6 +76,8 @@ export function azureFetchNetworkError(args: {
   });
 }
 
+// De momento solo lo utiliza azure en el fetch para el model list
+// si en el futurio lo utiliza por ejemplo google se moverá a shared
 function categorizeAzureHttpStatus(status: number): HelixErrorCategory {
   if (status === 401) return "auth_error";
   if (status === 403) return "permission_denied";
