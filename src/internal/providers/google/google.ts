@@ -1,22 +1,37 @@
-import GoogleOpenAI from "openai";
-import type { HelixConfig } from "../../../core/types/config.js";
-import type { Helix } from "../../../createHelix.js";
-import { responsesHandler } from "./google.responses.js";
-import { filesHandler } from "./google.files.js";
-import { modelsHandler } from "./google.models.js";
+import type { HelixConfig } from '../../../core/types/config.js';
+import type { Helix } from '../../../createHelix.js';
+import { modelsHandler } from './models/models.js';
+import type { GoogleClient } from './google.fetch.js';
 
-type GoogleConfig = Extract<HelixConfig, { provider: "google" }>;
+type GoogleConfig = Extract<HelixConfig, { provider: 'google' }>;
+
+const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 export function createGoogleAdapter(config: GoogleConfig): Helix {
-  const client = new GoogleOpenAI({
+  const client: GoogleClient = {
     apiKey: config.apiKey,
-    ...(config.baseUrl && { baseURL: config.baseUrl }),
-  });
+    baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
+  };
+
+  // TODO
+  const FAKE_ERROR = () => {
+    throw new Error('Not implemented yet.');
+  };
 
   return {
-    responses: responsesHandler(client),
-    files: filesHandler(client),
+    responses: {
+      create: FAKE_ERROR,
+    },
+    files: {
+      create: FAKE_ERROR,
+      list: FAKE_ERROR,
+      delete: FAKE_ERROR,
+    },
     models: modelsHandler(client),
-    test: () => modelsHandler(client).list().then(() => true).catch(() => false),
+    test: () =>
+      modelsHandler(client)
+        .list()
+        .then(() => true)
+        .catch(() => false),
   };
 }
