@@ -6,25 +6,33 @@ import {
 
 const PROVIDER = 'google' as const;
 
+// Docu Google: https://ai.google.dev/gemini-api/docs/troubleshooting?hl=es-419
+// Definicion de errores de todas las APis de google https://google.aip.dev/193
+interface GoogleErrorObject {
+  code?: number;
+  message?: string;
+  status?: string;
+  details?: unknown;
+}
+
 export function mapGoogleHttpError(res: Response, body: unknown): HelixError {
+  let errorObject: GoogleErrorObject | undefined;
   let message: string | undefined;
-  let googleStatus: string | undefined;
 
   if (body && typeof body === 'object' && 'error' in body) {
-    const e = (body as { error?: { message?: string; status?: string } }).error;
-    message = e?.message;
-    googleStatus = e?.status;
+    errorObject = (body as { error?: GoogleErrorObject }).error;
+    message = errorObject?.message;
   } else if (typeof body === 'string') {
     message = body;
   }
 
   return new HelixError({
-    category: categorize(res.status, googleStatus, message),
+    category: categorize(res.status, errorObject?.status, message),
     provider: PROVIDER,
     message: message ?? res.statusText ?? `HTTP ${res.status}`,
     httpStatus: res.status,
     requestId: res.headers.get('x-goog-request-id') ?? undefined,
-    meta: body !== undefined ? { body } : undefined,
+    meta: errorObject as Record<string, unknown> | undefined,
   });
 }
 
