@@ -42,7 +42,7 @@ export interface HelixUsage {
 export interface HelixResponse {
   id: string;
   object: typeof HelixObject.Response;
-  created_at: number;
+  created_at: number | null;
   completed_at: number | null;
   status: HelixResponseStatus;
   incomplete_details: HelixIncompleteDetails | null;

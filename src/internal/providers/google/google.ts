@@ -2,6 +2,7 @@ import type { HelixConfig } from '../../../core/types/config.js';
 import type { Helix } from '../../../createHelix.js';
 import { modelsHandler } from './models/models.js';
 import type { GoogleClient } from './google.fetch.js';
+import { responsesHandler } from './responses/google.responses.js';
 
 type GoogleConfig = Extract<HelixConfig, { provider: 'google' }>;
 
@@ -19,9 +20,7 @@ export function createGoogleAdapter(config: GoogleConfig): Helix {
   };
 
   return {
-    responses: {
-      create: FAKE_ERROR,
-    },
+    responses: responsesHandler(client),
     files: {
       create: FAKE_ERROR,
       list: FAKE_ERROR,
