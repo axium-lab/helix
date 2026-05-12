@@ -112,14 +112,14 @@ export function toGoogleBody(
 
   const format = params.text?.format;
 
-  if (format?.type === 'json_object') {
-    generationConfig.responseMimeType = 'application/json';
-  } else if (format?.type === 'json_schema') {
+  if (format?.type === 'json_object' || format?.type === 'json_schema') {
     generationConfig.responseMimeType = 'application/json';
 
-    generationConfig.responseSchema = toGeminiStructuredOutputSchema(
-      format.schema,
-    );
+    if (format.type === 'json_schema') {
+      generationConfig.responseSchema = toGeminiStructuredOutputSchema(
+        format.schema,
+      );
+    }
   }
 
   const out: GeminiGenerateContentRequest = { contents };
