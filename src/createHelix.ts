@@ -15,6 +15,7 @@ export interface Helix {
   };
   files: {
     create(params: FilesCreateParams): Promise<FileObject>;
+    get(id: string): Promise<FileObject>;
     list(): Promise<FileObject[]>;
     delete(id: string): Promise<{ id: string; deleted: true }>;
   };
