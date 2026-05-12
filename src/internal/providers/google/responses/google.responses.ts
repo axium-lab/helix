@@ -5,8 +5,8 @@ import {
 import { Helix } from '../../../../createHelix.js';
 import { GoogleClient, googleFetch } from '../google.fetch.js';
 import { mapGoogleError } from '../google.errors.js';
-import type { GeminiGenerateContentResponse } from './responses.types.js';
-import { toGoogleBody, toHelixResponse } from './responses.mapper.js';
+import type { GeminiGenerateContentResponse } from './google.responses.types.js';
+import { toGoogleBody, toHelixResponse } from './google.responses.mapper.js';
 
 async function createResponse(
   client: GoogleClient,

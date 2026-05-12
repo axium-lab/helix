@@ -31,7 +31,7 @@ const ok = await helix.test();
 console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-await runErrorScenarios(helix, config);
+// await runErrorScenarios(helix, config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ await runErrorScenarios(helix, config);
 // ── optional: happy response ─────────────────────────────────────────────────
 
 // const res = await helix.responses.create({
-//   model: 'gemini-3.1-flash-lite',
+//   model: 'gemini-3-flash-preview',
 //   instructions: 'Be concise.',
 //   input: [
 //     {
@@ -57,7 +57,45 @@ await runErrorScenarios(helix, config);
 //   max_output_tokens: 250,
 //   temperature: 0.5,
 // });
-// console.log('response:', res);
+// console.log(res);
+
+// ── optional: structured output (json_schema) ────────────────────────────────
+
+const structured = await helix.responses.create({
+  model: 'gemini-3-flash-preview',
+  instructions: 'Devuelve solo JSON válido conforme al schema.',
+  input: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'input_text',
+          text: 'Inventate un libro con título, personajes y resumen.',
+        },
+      ],
+    },
+  ],
+  text: {
+    format: {
+      type: 'json_schema',
+      name: 'book_schema',
+      schema: {
+        type: 'object',
+        properties: {
+          titulo: { type: 'string' },
+          personajes: { type: 'array', items: { type: 'string' } },
+          resumen: { type: 'string' },
+        },
+        required: ['titulo', 'personajes', 'resumen'],
+        additionalProperties: false,
+      },
+      strict: true,
+    },
+  },
+  max_output_tokens: 1500,
+  temperature: 0.7,
+});
+console.log(structured);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 

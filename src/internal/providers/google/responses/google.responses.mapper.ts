@@ -15,7 +15,7 @@ import type {
   GeminiGenerateContentResponse,
   GeminiGenerationConfig,
   GeminiUsageMetadata,
-} from './responses.types.js';
+} from './google.responses.types.js';
 
 interface MapperContext {
   model: string;
