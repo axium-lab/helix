@@ -74,5 +74,5 @@ export interface GeminiGenerateContentResponse {
   candidates?: GeminiCandidate[];
   usageMetadata?: GeminiUsageMetadata;
   modelVersion?: string;
-  responseId?: string;
+  responseId: string;
 }

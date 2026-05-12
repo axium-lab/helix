@@ -111,11 +111,15 @@ export function toGoogleBody(
   }
 
   const format = params.text?.format;
+
   if (format?.type === 'json_object') {
     generationConfig.responseMimeType = 'application/json';
   } else if (format?.type === 'json_schema') {
     generationConfig.responseMimeType = 'application/json';
-    generationConfig.responseSchema = format.schema;
+
+    generationConfig.responseSchema = toGeminiStructuredOutputSchema(
+      format.schema,
+    );
   }
 
   const out: GeminiGenerateContentRequest = { contents };
@@ -134,6 +138,7 @@ export function toHelixResponse(
   raw: GeminiGenerateContentResponse,
   ctx: MapperContext,
 ): HelixResponse {
+  // Los modelos actuales (2.x, 3.x) solo soportan 1 candidato.
   const candidate = raw.candidates?.[0];
 
   const finishReason = candidate?.finishReason;
@@ -141,7 +146,8 @@ export function toHelixResponse(
   const text = (candidate?.content?.parts ?? [])
     .map((p) => p.text ?? '')
     .join('');
-  const id = raw.responseId ?? `gemini_${crypto.randomUUID()}`;
+
+  const id = raw.responseId;
 
   // Gemini "model" → Helix "assistant". "user" se mapea directo.
   const role = candidate?.content?.role === 'user' ? 'user' : 'assistant';
@@ -221,6 +227,16 @@ function toIncompleteDetails(
     default:
       return null;
   }
+}
+
+// Gemini usa OpenAPI 3.0 (no JSON Schema) en responseSchema y rechaza
+// `additionalProperties`, que OpenAI exige con strict:true. Lo filtramos.
+function toGeminiStructuredOutputSchema(schema: unknown): object {
+  const serialized = JSON.stringify(schema, (key, value) =>
+    key === 'additionalProperties' ? undefined : value,
+  );
+
+  return JSON.parse(serialized);
 }
 
 function toUsage(u: GeminiUsageMetadata | undefined): HelixUsage {
