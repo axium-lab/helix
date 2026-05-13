@@ -3,6 +3,7 @@ import type { Helix } from '../../../createHelix.js';
 import { modelsHandler } from './models/models.js';
 import type { GoogleClient } from './google.fetch.js';
 import { responsesHandler } from './responses/google.responses.js';
+import { filesHandler } from './files/google.files.js';
 
 type GoogleConfig = Extract<HelixConfig, { provider: 'google' }>;
 
@@ -14,18 +15,9 @@ export function createGoogleAdapter(config: GoogleConfig): Helix {
     baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
   };
 
-  // TODO
-  const FAKE_ERROR = () => {
-    throw new Error('Not implemented yet.');
-  };
-
   return {
     responses: responsesHandler(client),
-    files: {
-      create: FAKE_ERROR,
-      list: FAKE_ERROR,
-      delete: FAKE_ERROR,
-    },
+    files: filesHandler(client),
     models: modelsHandler(client),
     test: () =>
       modelsHandler(client)

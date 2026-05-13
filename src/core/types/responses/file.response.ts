@@ -30,4 +30,5 @@ export interface FileObject {
   status: HelixFileStatus;
   status_details?: string;
   purpose?: HelixFilePurpose;
+  uri?: string;
 }

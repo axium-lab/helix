@@ -12,17 +12,16 @@ import { runErrorScenarios } from './manual-errors.js';
 // };
 
 // GOOGLE
-// const config: HelixConfig = {
-//   provider: 'google',
-//   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
-//   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
-// };
+const config: HelixConfig = {
+  provider: 'google',
+  apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+};
 
 // OPENAI
-const config: HelixConfig = {
-  provider: 'openai',
-  apiKey: process.env.HELIX_OPENAI_API_KEY!,
-};
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
 
 const helix = createHelix(config);
 
@@ -100,32 +99,35 @@ const helix = createHelix(config);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 
-const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
-const file = new File([bytes], 'axium.pdf', {
-  type: 'application/pdf',
-});
+// const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
+// const file = new File([bytes], 'axium.pdf', {
+//   type: 'application/pdf',
+// });
 
-const created = await helix.files.create({ file, purpose: 'user_data' });
-console.log('created:', created);
+// const created = await helix.files.create({ file });
+// console.log('created:', created);
 
 const files = await helix.files.list();
 console.log('files:', files);
 
-const resWithFile = await helix.responses.create({
-  model: 'gpt-5.1',
-  input: [
-    {
-      role: 'user',
-      content: [
-        { type: 'input_file', file_id: 'file-VHyUHknNTPur9ctFqBV8vC' },
-        { type: 'input_text', text: '¿Qué contiene este archivo?' },
-      ],
-    },
-  ],
-  max_output_tokens: 200,
-  temperature: 0.2,
-});
-console.log('resWithFileContent:', resWithFile);
+// const fileById = await helix.files.get('files/ceqlv1towkxi');
+// console.log('fileById:', fileById);
 
-// const deleted = await helix.files.delete('file-7g3ojnJbuKyHWTPVz3ffXq');
+// const resWithFile = await helix.responses.create({
+//   model: 'gemini-3-flash-preview',
+//   input: [
+//     {
+//       role: 'user',
+//       content: [
+//         { type: 'input_file', file_id: 'files/e2ro6ltkduir' },
+//         { type: 'input_text', text: '¿Qué contiene este archivo?' },
+//       ],
+//     },
+//   ],
+//   max_output_tokens: 200,
+//   temperature: 0.2,
+// });
+// console.log('resWithFileContent:', resWithFile);
+
+// const deleted = await helix.files.delete('files/1vpz1mdpquzh');
 // console.log('deleted:', deleted);

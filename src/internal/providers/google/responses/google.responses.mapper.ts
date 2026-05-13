@@ -5,15 +5,19 @@ import type {
   HelixUsage,
 } from '../../../../core/types/responses/llm.response.js';
 import type {
+  InputContentPart,
   InputText,
   ResponsesCreateParams,
 } from '../../../../core/types/request.js';
+import type { GoogleClient } from '../google.fetch.js';
+import { fetchGeminiFile } from '../files/google.files.js';
 import type {
   GeminiContent,
   GeminiFinishReason,
   GeminiGenerateContentRequest,
   GeminiGenerateContentResponse,
   GeminiGenerationConfig,
+  GeminiPart,
   GeminiUsageMetadata,
 } from './google.responses.types.js';
 
@@ -21,7 +25,6 @@ interface MapperContext {
   model: string;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Ejemplo de body Gemini (referencia rápida — para usar contra el endpoint REST)
 // ─────────────────────────────────────────────────────────────────────────────
 // {
@@ -73,32 +76,35 @@ interface MapperContext {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Helix → Gemini (request) Input Body
-export function toGoogleBody(
+export async function toGoogleBody(
+  client: GoogleClient,
   params: ResponsesCreateParams,
-): GeminiGenerateContentRequest {
+): Promise<GeminiGenerateContentRequest> {
   const systemTexts: string[] = [];
   if (params.instructions) systemTexts.push(params.instructions);
 
   const contents: GeminiContent[] = [];
 
   for (const msg of params.input) {
-    const text = msg.content
-      .filter((p): p is InputText => p.type === 'input_text')
-      .map((p) => p.text)
-      .join('');
-
-    // system/developer NO van en contents[], van a systemInstruction
+    // system/developer no soportan archivos en Gemini → solo concat texto y van
+    // a systemInstruction (separado de contents[]).
     if (msg.role === 'system' || msg.role === 'developer') {
+      const text = msg.content
+        .filter((p): p is InputText => p.type === 'input_text')
+        .map((p) => p.text)
+        .join('');
       systemTexts.push(text);
       continue;
     }
+
+    const parts = await toGoogleParts(client, msg.content);
 
     // Gemini usa "model" donde Helix (y OpenAI) usan "assistant". Si en el curl pones
     // "role": "assistant" directo, Gemini te devuelve 400 INVALID_ARGUMENT.
     // "user" sí coincide en ambos lados → mapeo directo.
     contents.push({
       role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text }],
+      parts,
     });
   }
 
@@ -131,6 +137,30 @@ export function toGoogleBody(
     out.generationConfig = generationConfig;
   }
   return out;
+}
+
+// Convierte los InputContentPart de Helix a GeminiPart,
+// resolviendo archivos con la Files API de Gemini.
+// TODO Google
+
+async function toGoogleParts(
+  client: GoogleClient,
+  content: InputContentPart[],
+): Promise<GeminiPart[]> {
+  return Promise.all(content.map((p) => toGooglePart(client, p)));
+}
+
+// Es necesaria esta transformacion
+// Helix espera {file_id: string}
+// Gemini espera {fileUri: string, mimeType: string}.
+async function toGooglePart(
+  client: GoogleClient,
+  p: InputContentPart,
+): Promise<GeminiPart> {
+  if (p.type === 'input_text') return { text: p.text };
+
+  const file = await fetchGeminiFile(client, p.file_id);
+  return { fileData: { mimeType: file.mimeType, fileUri: file.uri } };
 }
 
 // ── Gemini → Helix (response) ────────────────────────────────────────────────

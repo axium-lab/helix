@@ -13,7 +13,7 @@ async function createResponse(
   params: ResponsesCreateParams,
 ): Promise<HelixResponse> {
   try {
-    const body = toGoogleBody(params);
+    const body = await toGoogleBody(client, params);
 
     const raw = await googleFetch<GeminiGenerateContentResponse>(
       client,
