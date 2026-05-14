@@ -4,7 +4,6 @@ import type {
   ResponseError,
   ResponseInput,
   ResponseOutputMessage,
-  ResponseOutputText,
   ResponseStatus,
   ResponseUsage,
 } from 'openai/resources/responses/responses';
@@ -13,7 +12,10 @@ import type {
   FileObject as OpenAIFileObject,
 } from 'openai/resources/files';
 
+import type { HelixProviderKind } from '../../../core/types/config.js';
 import type {
+  HelixFinishReason,
+  OutputContentPart,
   HelixResponse,
   HelixResponseStatus,
   HelixUsage,
@@ -72,31 +74,46 @@ export function toOpenAIParams(
   };
 }
 
-export function toHelixResponse(r: OpenAIResponse): HelixResponse {
+export function toHelixResponse(
+  r: OpenAIResponse,
+  provider: HelixProviderKind,
+): HelixResponse {
+  const messages = r.output.filter(
+    (item): item is ResponseOutputMessage => item.type === 'message',
+  );
+  const hasRefusal = messages.some((m) =>
+    m.content.some((c) => c.type === 'refusal'),
+  );
+
   return {
     id: r.id,
     object: HelixObject.Response,
     created_at: r.created_at,
     completed_at: r.completed_at ?? null,
     status: toHelixStatus(r.status),
-    incomplete_details: r.incomplete_details?.reason
-      ? { reason: r.incomplete_details.reason }
-      : null,
+    finish_reason: toHelixFinishReason(
+      r.status,
+      r.incomplete_details?.reason,
+      hasRefusal,
+    ),
     error: toHelixError(r.error),
     model: String(r.model),
-    output: r.output
-      .filter((item): item is ResponseOutputMessage => item.type === 'message')
-      .map((m) => ({
-        type: 'message',
-        id: m.id,
-        role: m.role,
-        content: m.content
-          .filter((c): c is ResponseOutputText => c.type === 'output_text')
-          .map((c) => ({ type: 'output_text', text: c.text })),
-        status: m.status,
-      })),
+    output: messages.map((m) => ({
+      type: 'message',
+      id: m.id,
+      role: m.role,
+      content: m.content.flatMap((c): OutputContentPart[] => {
+        if (c.type === 'output_text')
+          return [{ type: 'output_text', text: c.text }];
+        if (c.type === 'refusal')
+          return [{ type: 'refusal', refusal: c.refusal }];
+        return [];
+      }),
+      status: m.status,
+    })),
     output_text: r.output_text,
     usage: toHelixUsage(r.usage),
+    metadata: { [provider]: r },
   };
 }
 
@@ -116,6 +133,22 @@ function toHelixStatus(
     case undefined:
       return 'completed';
   }
+}
+
+function toHelixFinishReason(
+  status: ResponseStatus | undefined,
+  incompleteReason: string | undefined,
+  hasRefusal: boolean,
+): HelixFinishReason | null {
+  if (status === 'in_progress' || status === 'queued') return null;
+  if (status === 'failed' || status === 'cancelled') return 'error';
+  if (hasRefusal) return 'refusal';
+  if (status === 'incomplete') {
+    if (incompleteReason === 'max_output_tokens') return 'max_tokens';
+    if (incompleteReason === 'content_filter') return 'content_filter';
+    return 'end_turn';
+  }
+  return 'end_turn';
 }
 
 function toHelixError(error: ResponseError | null): unknown | null {

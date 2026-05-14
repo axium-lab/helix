@@ -19,7 +19,7 @@ export function createCustomAdapter(config: CustomConfig): Helix {
       async create(params) {
         try {
           const raw = await client.responses.create(toOpenAIParams(params));
-          return toHelixResponse(raw);
+          return toHelixResponse(raw, config.provider);
         } catch (err) {
           throw mapCustomError(err);
         }
