@@ -16,7 +16,7 @@ export function createGoogleAdapter(config: GoogleConfig): Helix {
   };
 
   return {
-    responses: responsesHandler(client),
+    responses: responsesHandler(client, config.provider),
     files: filesHandler(client),
     models: modelsHandler(client),
     test: () =>

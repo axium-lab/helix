@@ -11,6 +11,7 @@ import { toGoogleBody, toHelixResponse } from './google.responses.mapper.js';
 async function createResponse(
   client: GoogleClient,
   params: ResponsesCreateParams,
+  provider: 'google',
 ): Promise<HelixResponse> {
   try {
     const body = await toGoogleBody(client, params);
@@ -22,14 +23,17 @@ async function createResponse(
       body,
     );
 
-    return toHelixResponse(raw, { model: params.model });
+    return toHelixResponse(raw, provider);
   } catch (err) {
     throw mapGoogleError(err);
   }
 }
 
-export function responsesHandler(client: GoogleClient): Helix['responses'] {
+export function responsesHandler(
+  client: GoogleClient,
+  provider: 'google',
+): Helix['responses'] {
   return {
-    create: (params) => createResponse(client, params),
+    create: (params) => createResponse(client, params, provider),
   };
 }

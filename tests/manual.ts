@@ -11,17 +11,17 @@ import { runErrorScenarios } from './manual-errors.js';
 //   apiVersion: process.env.HELIX_AZURE_API_VERSION!,
 // };
 
-// GOOGLE
-const config: HelixConfig = {
-  provider: 'google',
-  apiKey: process.env.HELIX_GOOGLE_API_KEY!,
-};
+// GOOGLE;
+// const config: HelixConfig = {
+//   provider: 'google',
+//   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+// };
 
 // OPENAI
-// const config: HelixConfig = {
-//   provider: 'openai',
-//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
-// };
+const config: HelixConfig = {
+  provider: 'openai',
+  apiKey: process.env.HELIX_OPENAI_API_KEY!,
+};
 
 const helix = createHelix(config);
 
@@ -40,24 +40,24 @@ const helix = createHelix(config);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
-// const res = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
-//   instructions: 'Be concise.',
-//   input: [
-//     {
-//       role: 'system',
-//       content: [{ type: 'input_text', text: 'Responde brevemente' }],
-//     },
-//     {
-//       role: 'user',
-//       content: [{ type: 'input_text', text: 'quiero un rollo' }],
-//     },
-//   ],
-//   text: { format: { type: 'text' } },
-//   max_output_tokens: 250,
-//   temperature: 0.5,
-// });
-// console.log(res);
+const res = await helix.responses.create({
+  model: 'gpt-5.2',
+  instructions: 'Be concise.',
+  input: [
+    {
+      role: 'system',
+      content: [{ type: 'input_text', text: 'Responde brevemente' }],
+    },
+    {
+      role: 'user',
+      content: [{ type: 'input_text', text: 'describe a un gato' }],
+    },
+  ],
+  text: { format: { type: 'text' } },
+  max_output_tokens: 50,
+  temperature: 0.5,
+});
+console.log(res);
 
 // ── optional: structured output (json_schema) ────────────────────────────────
 
@@ -107,8 +107,8 @@ const helix = createHelix(config);
 // const created = await helix.files.create({ file });
 // console.log('created:', created);
 
-const files = await helix.files.list();
-console.log('files:', files);
+// const files = await helix.files.list();
+// console.log('files:', files);
 
 // const fileById = await helix.files.get('files/ceqlv1towkxi');
 // console.log('fileById:', fileById);

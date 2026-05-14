@@ -1,8 +1,9 @@
 import type {
   HelixResponse,
-  HelixIncompleteDetails,
+  HelixFinishReason,
   HelixResponseStatus,
   HelixUsage,
+  HelixResponseMetadata,
 } from '../../../../core/types/responses/llm.response.js';
 import type {
   InputContentPart,
@@ -20,10 +21,6 @@ import type {
   GeminiPart,
   GeminiUsageMetadata,
 } from './google.responses.types.js';
-
-interface MapperContext {
-  model: string;
-}
 
 // Ejemplo de body Gemini (referencia rápida — para usar contra el endpoint REST)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -166,7 +163,7 @@ async function toGooglePart(
 // ── Gemini → Helix (response) ────────────────────────────────────────────────
 export function toHelixResponse(
   raw: GeminiGenerateContentResponse,
-  ctx: MapperContext,
+  provider: string,
 ): HelixResponse {
   // Los modelos actuales (2.x, 3.x) solo soportan 1 candidato.
   const candidate = raw.candidates?.[0];
@@ -189,9 +186,9 @@ export function toHelixResponse(
     created_at: null,
     completed_at: null,
     status,
-    incomplete_details: toIncompleteDetails(finishReason),
+    finish_reason: toIncompleteDetails(finishReason),
     error: null,
-    model: raw.modelVersion ?? ctx.model,
+    model: String(raw.modelVersion),
     output: candidate
       ? [
           {
@@ -207,6 +204,7 @@ export function toHelixResponse(
       : [],
     output_text: text,
     usage: toUsage(raw.usageMetadata),
+    metadata: { [provider]: raw },
   };
 }
 
@@ -241,10 +239,10 @@ function toStatus(reason: GeminiFinishReason | undefined): HelixResponseStatus {
 
 function toIncompleteDetails(
   reason: GeminiFinishReason | undefined,
-): HelixIncompleteDetails | null {
+): HelixFinishReason | null {
   switch (reason) {
     case 'MAX_TOKENS':
-      return { reason: 'max_output_tokens' };
+      return 'max_tokens';
     case 'SAFETY':
     case 'RECITATION':
     case 'BLOCKLIST':
@@ -253,7 +251,7 @@ function toIncompleteDetails(
     case 'IMAGE_SAFETY':
     case 'IMAGE_PROHIBITED_CONTENT':
     case 'IMAGE_RECITATION':
-      return { reason: 'content_filter' };
+      return 'content_filter';
     default:
       return null;
   }

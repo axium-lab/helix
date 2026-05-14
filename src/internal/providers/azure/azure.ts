@@ -18,7 +18,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
   const models = handleModels(config);
 
   return {
-    responses: handleResponse(client),
+    responses: handleResponse(client, config.provider),
     files: handleFiles(client),
     models,
     async test() {

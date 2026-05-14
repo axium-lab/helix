@@ -81,6 +81,7 @@ export function toHelixResponse(
   const messages = r.output.filter(
     (item): item is ResponseOutputMessage => item.type === 'message',
   );
+
   const hasRefusal = messages.some((m) =>
     m.content.some((c) => c.type === 'refusal'),
   );
