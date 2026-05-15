@@ -1,17 +1,17 @@
-import type { HelixProviderKind } from "../types/config.js";
+import type { HelixProviderKind } from '../types/config.js';
 
 export type HelixErrorCategory =
-  | "auth_error"
-  | "permission_denied"
-  | "not_found"
-  | "rate_limit"
-  | "quota_exceeded"
-  | "content_filter"
-  | "invalid_request"
-  | "server_error"
-  | "timeout"
-  | "connection_error"
-  | "unknown";
+  | 'auth_error'
+  | 'permission_denied'
+  | 'not_found'
+  | 'rate_limit'
+  | 'quota_exceeded'
+  | 'content_filter'
+  | 'invalid_request'
+  | 'server_error'
+  | 'timeout'
+  | 'connection_error'
+  | 'unknown';
 
 export interface HelixErrorArgs {
   category: HelixErrorCategory;
@@ -31,8 +31,11 @@ export class HelixError extends Error {
   readonly meta?: Record<string, unknown>;
 
   constructor(args: HelixErrorArgs) {
-    super(args.message, args.cause !== undefined ? { cause: args.cause } : undefined);
-    this.name = "HelixError";
+    super(
+      args.message,
+      args.cause !== undefined ? { cause: args.cause } : undefined,
+    );
+    this.name = 'HelixError';
     this.category = args.category;
     this.provider = args.provider;
     this.httpStatus = args.httpStatus ?? fallbackHttpStatus(args.category);
@@ -42,17 +45,19 @@ export class HelixError extends Error {
 }
 
 // En caso de que no tengamos un httpStatus explícito, podemos sugerir uno basado en la categoría del error.
-// Ya que aveces vienen sin httpStatus (ej: errores de conexión), 
+// Ya que aveces vienen sin httpStatus (ej: errores de conexión),
 // o con httpStatus genéricos (ej: OpenAI devuelve 400 para invalid_request incluso en casos de model_not_found).
 function fallbackHttpStatus(category: HelixErrorCategory): number {
   switch (category) {
-    case "connection_error": return 502;
-    case "timeout": return 504;
-    default: return 500;
+    case 'connection_error':
+      return 502;
+    case 'timeout':
+      return 504;
+    default:
+      return 500;
   }
 }
 
 export function isHelixError(value: unknown): value is HelixError {
   return value instanceof HelixError;
 }
-
