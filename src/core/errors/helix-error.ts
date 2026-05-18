@@ -26,7 +26,7 @@ export interface HelixErrorArgs {
 export class HelixError extends Error {
   readonly category: HelixErrorCategory;
   readonly provider: HelixProviderKind;
-  readonly httpStatus?: number;
+  readonly httpStatus: number;
   readonly requestId?: string;
   readonly meta?: Record<string, unknown>;
 
@@ -35,14 +35,24 @@ export class HelixError extends Error {
     this.name = "HelixError";
     this.category = args.category;
     this.provider = args.provider;
-    this.httpStatus = args.httpStatus;
+    this.httpStatus = args.httpStatus ?? fallbackHttpStatus(args.category);
     this.requestId = args.requestId;
     this.meta = args.meta;
+  }
+}
+
+// En caso de que no tengamos un httpStatus explícito, podemos sugerir uno basado en la categoría del error.
+// Ya que aveces vienen sin httpStatus (ej: errores de conexión), 
+// o con httpStatus genéricos (ej: OpenAI devuelve 400 para invalid_request incluso en casos de model_not_found).
+function fallbackHttpStatus(category: HelixErrorCategory): number {
+  switch (category) {
+    case "connection_error": return 502;
+    case "timeout": return 504;
+    default: return 500;
   }
 }
 
 export function isHelixError(value: unknown): value is HelixError {
   return value instanceof HelixError;
 }
-
 
