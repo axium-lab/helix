@@ -35,51 +35,29 @@ import {
 export type ProviderErrorConfig = {
   provider: HelixProviderKind;
   buildMeta: (err: APIError) => Record<string, unknown> | undefined;
+  // Detecta contenido inapropiado  Azure Responsible AI Policy Violation
   detectResponsibleAIViolation?: (err: APIError, code: string | undefined) => boolean;
+  // Override para providers que usan headers distintos a x-request-id (ej: Azure)
+  buildRequestId?: (err: APIError) => string | undefined;
 };
 
 export function mapSdkError(err: unknown, cfg: ProviderErrorConfig): HelixError {
+
   if (isHelixError(err)) return err;
+  if (err instanceof APIConnectionTimeoutError)
+    return defaultHelixError("timeout", err, cfg);
 
-  if (err instanceof APIConnectionTimeoutError) {
-    return new HelixError({
-      category: "timeout",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof APIConnectionError)
+    return defaultHelixError("connection_error", err, cfg);
 
-  if (err instanceof APIConnectionError) {
-    return new HelixError({
-      category: "connection_error",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof APIUserAbortError)
+    return defaultHelixError("unknown", err, cfg);
 
-  if (err instanceof APIUserAbortError) {
-    return new HelixError({
-      category: "unknown",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
-
-  if (err instanceof APIError) {
+  if (err instanceof APIError)
     return mapAPIError(err, cfg);
-  }
 
-  if (err instanceof Error) {
-    return new HelixError({
-      category: "unknown",
-      provider: cfg.provider,
-      message: err.message,
-      cause: err,
-    });
-  }
+  if (err instanceof Error)
+    return defaultHelixError("unknown", err, cfg);
 
   return new HelixError({
     category: "unknown",
@@ -89,17 +67,25 @@ export function mapSdkError(err: unknown, cfg: ProviderErrorConfig): HelixError 
   });
 }
 
+function defaultHelixError(category: HelixErrorCategory, err: Error, cfg: ProviderErrorConfig): HelixError {
+  return new HelixError({ category, provider: cfg.provider, message: err.message, cause: err });
+}
+
 function mapAPIError(err: APIError, cfg: ProviderErrorConfig): HelixError {
   const code = typeof err.code === "string" ? err.code : undefined;
   const category = categorize(err, code, cfg);
   const meta = cfg.buildMeta(err);
+
+  const requestId = cfg.buildRequestId
+    ? cfg.buildRequestId(err)
+    : (err.requestID ?? undefined);
 
   return new HelixError({
     category,
     provider: cfg.provider,
     message: err.message,
     httpStatus: err.status,
-    requestId: err.requestID ?? undefined,
+    requestId,
     meta,
     cause: err,
   });
@@ -110,12 +96,14 @@ function categorize(
   code: string | undefined,
   cfg: ProviderErrorConfig,
 ): HelixErrorCategory {
+
   if (err instanceof BadRequestError) {
     const isContentFilter = cfg.detectResponsibleAIViolation
       ? cfg.detectResponsibleAIViolation(err, code)
       : code === "content_filter";
     return isContentFilter ? "content_filter" : "invalid_request";
   }
+
   if (err instanceof AuthenticationError) return "auth_error";
   if (err instanceof PermissionDeniedError) return "permission_denied";
   if (err instanceof NotFoundError) return "not_found";
