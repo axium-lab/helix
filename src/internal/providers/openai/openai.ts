@@ -14,7 +14,7 @@ export function createOpenAIAdapter(config: OpenAIConfig): Helix {
   });
 
   return {
-    responses: responsesHandler(client),
+    responses: responsesHandler(client, config.provider),
     files: filesHandler(client),
     models: modelsHandler(client),
     test: () => modelsHandler(client).list().then(() => true).catch(() => false),
