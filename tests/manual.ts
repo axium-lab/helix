@@ -12,7 +12,7 @@ import { runErrorScenarios } from './manual-errors.js';
 
 // GOOGLE
 const config: HelixConfig = {
-  provider: 'google',
+  provider: 'google-aistudio',
   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
 };

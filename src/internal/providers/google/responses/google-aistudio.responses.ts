@@ -3,10 +3,13 @@ import {
   ResponsesCreateParams,
 } from '../../../../core/index.js';
 import { Helix } from '../../../../createHelix.js';
-import { GoogleClient, googleFetch } from '../google.fetch.js';
-import { mapGoogleError } from '../google.errors.js';
-import type { GeminiGenerateContentResponse } from './google.responses.types.js';
-import { toGoogleBody, toHelixResponse } from './google.responses.mapper.js';
+import { GoogleClient, googleFetch } from '../google-aistudio.fetch.js';
+import { mapGoogleError } from '../google-aistudio.errors.js';
+import type { GeminiGenerateContentResponse } from './google-aistudio.responses.types.js';
+import {
+  toGoogleBody,
+  toHelixResponse,
+} from './google-aistudio.responses.mapper.js';
 
 async function createResponse(
   client: GoogleClient,

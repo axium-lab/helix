@@ -15,7 +15,7 @@ import type {
   GeminiGenerateContentResponse,
   GeminiGenerationConfig,
   GeminiUsageMetadata,
-} from './google.responses.types.js';
+} from './google-aistudio.responses.types.js';
 
 interface MapperContext {
   model: string;

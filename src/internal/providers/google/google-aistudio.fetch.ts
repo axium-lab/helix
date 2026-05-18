@@ -1,4 +1,7 @@
-import { mapGoogleHttpError, mapGoogleNetworkError } from './google.errors.js';
+import {
+  mapGoogleAiStudioHttpError,
+  mapGoogleAiStudioNetworkError,
+} from './google-aistudio.errors.js';
 
 export interface GoogleClient {
   apiKey: string;
@@ -24,7 +27,7 @@ export async function googleFetch<T>(
       ...(body !== undefined && { body: JSON.stringify(body) }),
     });
   } catch (err) {
-    throw mapGoogleNetworkError(err);
+    throw mapGoogleAiStudioNetworkError(err);
   }
 
   if (!res.ok) {
@@ -37,7 +40,7 @@ export async function googleFetch<T>(
         errorBody = text;
       }
     }
-    throw mapGoogleHttpError(res, errorBody);
+    throw mapGoogleAiStudioHttpError(res, errorBody);
   }
 
   return (await res.json()) as T;
