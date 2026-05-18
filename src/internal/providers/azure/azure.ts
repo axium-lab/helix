@@ -27,7 +27,7 @@ export function createAzureAdapter(config: AzureConfig): Helix {
       async create(params) {
         try {
           const raw = await client.responses.create(toOpenAIParams(params));
-          return toHelixResponse(raw);
+          return toHelixResponse(raw, config.provider);
         } catch (err) {
           throw mapAzureError(err);
         }

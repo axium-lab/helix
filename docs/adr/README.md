@@ -19,3 +19,4 @@ ADRs are immutable once accepted. New decisions that supersede an ADR get a new 
 | 0005 | FilesCreateParams Narrowed to File \| Blob with Required Purpose | 2026-04-28 | Accepted |
 | 0006 | Standardized HelixError Across All Providers | 2026-04-29 | Accepted (planned) |
 | 0007 | Explicit Mappers for OpenAI `responses.create` Adapter | 2026-04-30 | Accepted |
+| 0008 | `finish_reason` and `metadata` in `HelixResponse` | 2026-05-05 | Accepted |

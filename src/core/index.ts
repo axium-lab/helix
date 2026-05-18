@@ -16,12 +16,15 @@ export type {
 
 export type {
   OutputTextPart,
+  RefusalPart,
+  OutputContentPart,
   OutputMessage,
   OutputItem,
   HelixUsage,
   HelixResponse,
   HelixResponseStatus,
-  HelixIncompleteDetails,
+  HelixFinishReason,
+  HelixResponseMetadata,
 } from "./types/responses/llm.response.js";
 
 export type {
