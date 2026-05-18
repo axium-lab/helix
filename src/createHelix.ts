@@ -10,7 +10,7 @@ import type { ModelInfo } from './core/types/models.js';
 import { createOpenAIAdapter } from './internal/providers/openai/openai.js';
 import { createAzureAdapter } from './internal/providers/azure/azure.js';
 import { createCustomAdapter } from './internal/providers/custom/custom.js';
-import { createGoogleAiStudioAdapter } from './internal/providers/google/google-aistudio.js';
+import { createGoogleAiStudioAdapter } from './internal/providers/google-aistudio/google-aistudio.js';
 
 export interface Helix {
   responses: {

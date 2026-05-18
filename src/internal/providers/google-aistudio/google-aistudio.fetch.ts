@@ -3,13 +3,13 @@ import {
   mapGoogleAiStudioNetworkError,
 } from './google-aistudio.errors.js';
 
-export interface GoogleClient {
+export interface GoogleAiStudioClient {
   apiKey: string;
   baseUrl: string;
 }
 
-export async function googleFetch<T>(
-  client: GoogleClient,
+export async function googleAiStudioFetch<T>(
+  client: GoogleAiStudioClient,
   method: string,
   path: string,
   body?: unknown,
