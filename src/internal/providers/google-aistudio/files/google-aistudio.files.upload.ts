@@ -1,6 +1,12 @@
-import type { GoogleClient } from '../google.fetch.js';
-import { mapGoogleHttpError, mapGoogleNetworkError } from '../google.errors.js';
-import type { GeminiFile, GeminiFileWrapper } from './google.files.types.js';
+import { GoogleAiStudioClient } from '../google-aistudio.fetch.js';
+import {
+  mapGoogleAiStudioHttpError,
+  mapGoogleAiStudioNetworkError,
+} from '../google-aistudio.errors.js';
+import type {
+  GeminiFile,
+  GeminiFileWrapper,
+} from './google-aistudio.files.types.js';
 
 // Docu para subir archivos de Gemini:
 // https://ai.google.dev/api/files?hl=es-419
@@ -14,7 +20,7 @@ export interface GoogleUploadParams {
 }
 
 export async function googleUpload(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   params: GoogleUploadParams,
 ): Promise<GeminiFile> {
   // Mandamos los metadatos (nombre, tamaño, mime type), Google te devuelve una URL temporal
@@ -26,7 +32,7 @@ export async function googleUpload(
 }
 
 async function startResumableUpload(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   params: GoogleUploadParams,
 ): Promise<string> {
   const origin = new URL(client.baseUrl).origin;
@@ -52,11 +58,11 @@ async function startResumableUpload(
       body: JSON.stringify(body),
     });
   } catch (err) {
-    throw mapGoogleNetworkError(err);
+    throw mapGoogleAiStudioNetworkError(err);
   }
 
   if (!res.ok) {
-    throw mapGoogleHttpError(res, await readErrorBody(res));
+    throw mapGoogleAiStudioHttpError(res, await readErrorBody(res));
   }
 
   const uploadUrl = res.headers.get('x-goog-upload-url');
@@ -84,11 +90,11 @@ async function finalizeUpload(
       body: params.file,
     });
   } catch (err) {
-    throw mapGoogleNetworkError(err);
+    throw mapGoogleAiStudioNetworkError(err);
   }
 
   if (!res.ok) {
-    throw mapGoogleHttpError(res, await readErrorBody(res));
+    throw mapGoogleAiStudioHttpError(res, await readErrorBody(res));
   }
 
   const wrapper = (await res.json()) as GeminiFileWrapper;

@@ -10,8 +10,8 @@ import type {
   InputText,
   ResponsesCreateParams,
 } from '../../../../core/types/request.js';
-import type { GoogleClient } from '../google.fetch.js';
-import { fetchGeminiFile } from '../files/google.files.js';
+import type { GoogleAiStudioClient } from '../google-aistudio.fetch.js';
+import { fetchGeminiFile } from '../files/google-aistudio.files.js';
 import type {
   GeminiContent,
   GeminiFinishReason,
@@ -74,7 +74,7 @@ import type {
 
 // ── Helix → Gemini (request) Input Body
 export async function toGoogleBody(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   params: ResponsesCreateParams,
 ): Promise<GeminiGenerateContentRequest> {
   const systemTexts: string[] = [];
@@ -141,7 +141,7 @@ export async function toGoogleBody(
 // TODO Google
 
 async function toGoogleParts(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   content: InputContentPart[],
 ): Promise<GeminiPart[]> {
   return Promise.all(content.map((p) => toGooglePart(client, p)));
@@ -151,7 +151,7 @@ async function toGoogleParts(
 // Helix espera {file_id: string}
 // Gemini espera {fileUri: string, mimeType: string}.
 async function toGooglePart(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   p: InputContentPart,
 ): Promise<GeminiPart> {
   if (p.type === 'input_text') return { text: p.text };

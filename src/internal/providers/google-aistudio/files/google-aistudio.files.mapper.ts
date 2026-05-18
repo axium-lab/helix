@@ -3,7 +3,10 @@ import type {
   HelixFileStatus,
 } from '../../../../core/types/responses/file.response.js';
 import { HelixObject } from '../../../../core/types/helix-object.js';
-import type { GeminiFile, GeminiFileState } from './google.files.types.js';
+import type {
+  GeminiFile,
+  GeminiFileState,
+} from './google-aistudio.files.types.js';
 
 export function toHelixFileObject(f: GeminiFile): FileObject {
   const out: FileObject = {

@@ -12,11 +12,11 @@ import { runErrorScenarios } from './manual-errors.js';
 // };
 
 // GOOGLE
-// const config: HelixConfig = {
-//   provider: 'google-aistudio',
-//   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
-//   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
-// };
+const config: HelixConfig = {
+  provider: 'google-aistudio',
+  apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+  baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
+};
 
 // // OPENAI
 // const config: HelixConfig = {
@@ -25,10 +25,10 @@ import { runErrorScenarios } from './manual-errors.js';
 // };
 
 // OPENAI
-const config: HelixConfig = {
-  provider: 'openai',
-  apiKey: process.env.HELIX_OPENAI_API_KEY!,
-};
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
 
 const helix = createHelix(config);
 
@@ -38,7 +38,7 @@ const helix = createHelix(config);
 // console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-// // await runErrorScenarios(helix, config);
+// await runErrorScenarios(helix, config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
@@ -47,24 +47,24 @@ const helix = createHelix(config);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
-const res = await helix.responses.create({
-  model: 'gpt-5.2',
-  instructions: 'Be concise.',
-  input: [
-    {
-      role: 'system',
-      content: [{ type: 'input_text', text: 'Responde brevemente' }],
-    },
-    {
-      role: 'user',
-      content: [{ type: 'input_text', text: 'describe a un gato' }],
-    },
-  ],
-  text: { format: { type: 'text' } },
-  max_output_tokens: 50,
-  temperature: 0.5,
-});
-console.log(res);
+// const res = await helix.responses.create({
+//   model: 'gemini-3-flash-preview',
+//   instructions: 'Be concise.',
+//   input: [
+//     {
+//       role: 'system',
+//       content: [{ type: 'input_text', text: 'Responde brevemente' }],
+//     },
+//     {
+//       role: 'user',
+//       content: [{ type: 'input_text', text: 'describe a un gato' }],
+//     },
+//   ],
+//   text: { format: { type: 'text' } },
+//   max_output_tokens: 50,
+//   temperature: 0.5,
+// });
+// console.log(res);
 
 // ── optional: structured output (json_schema) ────────────────────────────────
 
@@ -117,7 +117,7 @@ console.log(res);
 // const files = await helix.files.list();
 // console.log('files:', files);
 
-// const fileById = await helix.files.get('files/ceqlv1towkxi');
+// const fileById = await helix.files.get(created.id);
 // console.log('fileById:', fileById);
 
 // const resWithFile = await helix.responses.create({
@@ -126,7 +126,7 @@ console.log(res);
 //     {
 //       role: 'user',
 //       content: [
-//         { type: 'input_file', file_id: 'files/e2ro6ltkduir' },
+//         { type: 'input_file', file_id: created.id },
 //         { type: 'input_text', text: '¿Qué contiene este archivo?' },
 //       ],
 //     },
@@ -136,5 +136,5 @@ console.log(res);
 // });
 // console.log('resWithFileContent:', resWithFile);
 
-// const deleted = await helix.files.delete('files/1vpz1mdpquzh');
+// const deleted = await helix.files.delete('files/sjt2iv0uax36');
 // console.log('deleted:', deleted);

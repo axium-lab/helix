@@ -1,7 +1,7 @@
 import type { Helix } from '../../../../createHelix.js';
 import type { ModelInfo } from '../../../../core/types/models.js';
 import { HelixObject } from '../../../../core/types/helix-object.js';
-import { mapGoogleError } from '../google-aistudio.errors.js';
+import { mapGoogleAiStudioError } from '../google-aistudio.errors.js';
 import {
   googleAiStudioFetch,
   type GoogleAiStudioClient,
@@ -24,7 +24,7 @@ async function listModels(client: GoogleAiStudioClient): Promise<ModelInfo[]> {
       owned_by: 'google-aistudio',
     }));
   } catch (err) {
-    throw mapGoogleError(err);
+    throw mapGoogleAiStudioError(err);
   }
 }
 
