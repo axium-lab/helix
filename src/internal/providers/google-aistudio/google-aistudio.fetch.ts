@@ -43,5 +43,8 @@ export async function googleAiStudioFetch<T>(
     throw mapGoogleAiStudioHttpError(res, errorBody);
   }
 
-  return (await res.json()) as T;
+  // Gemini devuelve body vacío en DELETE — no parseamos si no hay nada.
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }

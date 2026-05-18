@@ -3,6 +3,7 @@ import type { Helix } from '../../../createHelix.js';
 import { modelsHandler } from './models/google-aistudio.models.js';
 import type { GoogleAiStudioClient } from './google-aistudio.fetch.js';
 import { responsesHandler } from './responses/google-aistudio.responses.js';
+import { filesHandler } from './files/google-aistudio.files.js';
 
 type GoogleConfig = Extract<HelixConfig, { provider: 'google-aistudio' }>;
 
@@ -14,18 +15,9 @@ export function createGoogleAiStudioAdapter(config: GoogleConfig): Helix {
     baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
   };
 
-  // TODO
-  const FAKE_ERROR = () => {
-    throw new Error('Not implemented yet.');
-  };
-
   return {
     responses: responsesHandler(client, config.provider),
-    files: {
-      create: FAKE_ERROR,
-      list: FAKE_ERROR,
-      delete: FAKE_ERROR,
-    },
+    files: filesHandler(client),
     models: modelsHandler(client),
     test: () =>
       modelsHandler(client)

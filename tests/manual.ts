@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { HelixConfig } from '../src/core/index.js';
 import { createHelix } from '../src/createHelix.js';
 import { runErrorScenarios } from './manual-errors.js';
@@ -19,6 +20,18 @@ const config: HelixConfig = {
 
 // // OPENAI
 // const config: HelixConfig = {
+//   provider: 'google',
+//   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+// };
+
+// OPENAI
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
+
+// // OPENAI
+// const config: HelixConfig = {
 //   provider: 'openai',
 //   apiKey: process.env.HELIX_OPENAI_API_KEY!,
 // };
@@ -27,8 +40,8 @@ const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-const ok = await helix.test();
-console.log('test:', ok);
+// const ok = await helix.test();
+// console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
 await runErrorScenarios(helix, config);
@@ -50,11 +63,11 @@ await runErrorScenarios(helix, config);
 //     },
 //     {
 //       role: 'user',
-//       content: [{ type: 'input_text', text: 'quiero un rollo' }],
+//       content: [{ type: 'input_text', text: 'describe a un gato' }],
 //     },
 //   ],
 //   text: { format: { type: 'text' } },
-//   max_output_tokens: 250,
+//   max_output_tokens: 50,
 //   temperature: 0.5,
 // });
 // console.log(res);
@@ -99,14 +112,35 @@ await runErrorScenarios(helix, config);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 
-// const file = new File(['hello from helix'], 'manual.txt', {
-//   type: 'text/plain',
+// const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
+// const file = new File([bytes], 'axium.pdf', {
+//   type: 'application/pdf',
 // });
-// const created = await helix.files.create({ file, purpose: 'user_data' });
-// console.log('created:', created.id);
+
+// const created = await helix.files.create({ file });
+// console.log('created:', created);
 
 // const files = await helix.files.list();
 // console.log('files:', files);
 
-// const deleted = await helix.files.delete(created.id);
+// const fileById = await helix.files.get(created.id);
+// console.log('fileById:', fileById);
+
+// const resWithFile = await helix.responses.create({
+//   model: 'gemini-3-flash-preview',
+//   input: [
+//     {
+//       role: 'user',
+//       content: [
+//         { type: 'input_file', file_id: created.id },
+//         { type: 'input_text', text: '¿Qué contiene este archivo?' },
+//       ],
+//     },
+//   ],
+//   max_output_tokens: 200,
+//   temperature: 0.2,
+// });
+// console.log('resWithFileContent:', resWithFile);
+
+// const deleted = await helix.files.delete('files/sjt2iv0uax36');
 // console.log('deleted:', deleted);

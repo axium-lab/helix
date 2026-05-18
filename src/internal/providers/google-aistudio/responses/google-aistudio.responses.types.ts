@@ -5,10 +5,15 @@
 
 export type GeminiRole = 'user' | 'model';
 
+export interface GeminiFileData {
+  mimeType: string;
+  fileUri: string;
+}
+
 export interface GeminiPart {
-  // En v0 solo manejamos texto. Cuando agreguemos multimodal o tools,
-  // sumamos inlineData / fileData / functionCall / functionResponse.
   text?: string;
+  fileData?: GeminiFileData;
+  // Pendiente: inlineData / functionCall / functionResponse cuando agreguemos multimodal/tools.
 }
 
 export interface GeminiContent {

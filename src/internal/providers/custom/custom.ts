@@ -29,6 +29,9 @@ export function createCustomAdapter(config: CustomConfig): Helix {
       create(_params): Promise<never> {
         throw customNotSupportedError("files.create");
       },
+      get(_id): Promise<never> {
+        throw customNotSupportedError("files.get");
+      },
       list(): Promise<never> {
         throw customNotSupportedError("files.list");
       },

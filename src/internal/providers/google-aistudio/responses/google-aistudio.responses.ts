@@ -8,7 +8,7 @@ import {
   GoogleAiStudioClient,
   googleAiStudioFetch,
 } from '../google-aistudio.fetch.js';
-import { mapGoogleError } from '../google-aistudio.errors.js';
+import { mapGoogleAiStudioError } from '../google-aistudio.errors.js';
 import type { GeminiGenerateContentResponse } from './google-aistudio.responses.types.js';
 import {
   toGoogleBody,
@@ -21,7 +21,7 @@ async function createResponse(
   params: ResponsesCreateParams,
 ): Promise<HelixResponse> {
   try {
-    const body = toGoogleBody(params);
+    const body = await toGoogleBody(client, params);
 
     const raw = await googleAiStudioFetch<GeminiGenerateContentResponse>(
       client,
@@ -32,7 +32,7 @@ async function createResponse(
 
     return toHelixResponse(raw, provider);
   } catch (err) {
-    throw mapGoogleError(err);
+    throw mapGoogleAiStudioError(err);
   }
 }
 

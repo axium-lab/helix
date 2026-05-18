@@ -58,7 +58,7 @@ export function mapGoogleAiStudioNetworkError(err: unknown): HelixError {
   });
 }
 
-export function mapGoogleError(err: unknown): HelixError {
+export function mapGoogleAiStudioError(err: unknown): HelixError {
   return isHelixError(err) ? err : mapGoogleAiStudioNetworkError(err);
 }
 
