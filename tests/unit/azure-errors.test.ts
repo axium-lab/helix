@@ -18,7 +18,7 @@ function buildHeaders(): Headers {
 }
 
 function buildAPIError(status: number, body: unknown): APIError {
-  return APIError.generate(status, body, "msg", buildHeaders());
+  return APIError.generate(status, body as any, "msg", buildHeaders());
 }
 
 // ---------------------------------------------------------------------------
