@@ -23,7 +23,7 @@ import { HelixObject } from "../../../core/types/helix-object.js";
  * Mappers shared by every provider whose upstream SDK speaks the OpenAI wire
  * format (today: OpenAI, Azure OpenAI, Custom OpenAI-compatible). Per ADR-0007.
  *
- * When a provider with a different shape lands (Vertex, Anthropic), it gets
+ * When a provider with a different shape lands (Google, Anthropic), it gets
  * its own `to{Provider}Params` / `to{Provider}Response` siblings here — the
  * `_shared` folder hosts mappers grouped by upstream SDK, not by provider.
  */
