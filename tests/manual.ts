@@ -30,6 +30,12 @@ const config: HelixConfig = {
 //   apiKey: process.env.HELIX_OPENAI_API_KEY!,
 // };
 
+// // OPENAI
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
+
 const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
