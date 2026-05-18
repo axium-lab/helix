@@ -3,20 +3,26 @@ import {
   ResponsesCreateParams,
 } from '../../../../core/index.js';
 import { Helix } from '../../../../createHelix.js';
-import { GoogleClient, googleFetch } from '../google.fetch.js';
-import { mapGoogleError } from '../google.errors.js';
-import type { GeminiGenerateContentResponse } from './google.responses.types.js';
-import { toGoogleBody, toHelixResponse } from './google.responses.mapper.js';
+import {
+  GoogleAiStudioClient,
+  googleAiStudioFetch,
+} from '../google-aistudio.fetch.js';
+import { mapGoogleError } from '../google-aistudio.errors.js';
+import type { GeminiGenerateContentResponse } from './google-aistudio.responses.types.js';
+import {
+  toGoogleBody,
+  toHelixResponse,
+} from './google-aistudio.responses.mapper.js';
 
 async function createResponse(
-  client: GoogleClient,
+  client: GoogleAiStudioClient,
   params: ResponsesCreateParams,
-  provider: 'google',
+  provider: 'google-aistudio',
 ): Promise<HelixResponse> {
   try {
     const body = await toGoogleBody(client, params);
 
-    const raw = await googleFetch<GeminiGenerateContentResponse>(
+    const raw = await googleAiStudioFetch<GeminiGenerateContentResponse>(
       client,
       'POST',
       `/models/${encodeURIComponent(params.model)}:generateContent`,
@@ -30,8 +36,8 @@ async function createResponse(
 }
 
 export function responsesHandler(
-  client: GoogleClient,
-  provider: 'google',
+  client: GoogleAiStudioClient,
+  provider: 'google-aistudio',
 ): Helix['responses'] {
   return {
     create: (params) => createResponse(client, params, provider),

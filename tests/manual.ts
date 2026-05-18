@@ -11,7 +11,14 @@ import { runErrorScenarios } from './manual-errors.js';
 //   apiVersion: process.env.HELIX_AZURE_API_VERSION!,
 // };
 
-// GOOGLE;
+// GOOGLE
+// const config: HelixConfig = {
+//   provider: 'google-aistudio',
+//   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
+//   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
+// };
+
+// // OPENAI
 // const config: HelixConfig = {
 //   provider: 'google',
 //   apiKey: process.env.HELIX_GOOGLE_API_KEY!,

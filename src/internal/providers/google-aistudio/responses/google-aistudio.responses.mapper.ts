@@ -20,7 +20,7 @@ import type {
   GeminiGenerationConfig,
   GeminiPart,
   GeminiUsageMetadata,
-} from './google.responses.types.js';
+} from './google-aistudio.responses.types.js';
 
 // Ejemplo de body Gemini (referencia rápida — para usar contra el endpoint REST)
 // ─────────────────────────────────────────────────────────────────────────────

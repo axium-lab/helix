@@ -4,7 +4,7 @@ import {
   type HelixErrorCategory,
 } from '../../../core/errors/helix-error.js';
 
-const PROVIDER = 'google' as const;
+const PROVIDER = 'google-aistudio' as const;
 
 // Docu Google: https://ai.google.dev/gemini-api/docs/troubleshooting?hl=es-419
 // Definicion de errores de todas las APis de google https://google.aip.dev/193
@@ -15,7 +15,10 @@ interface GoogleErrorObject {
   details?: unknown;
 }
 
-export function mapGoogleHttpError(res: Response, body: unknown): HelixError {
+export function mapGoogleAiStudioHttpError(
+  res: Response,
+  body: unknown,
+): HelixError {
   let errorObject: GoogleErrorObject | undefined;
   let message: string | undefined;
 
@@ -36,7 +39,7 @@ export function mapGoogleHttpError(res: Response, body: unknown): HelixError {
   });
 }
 
-export function mapGoogleNetworkError(err: unknown): HelixError {
+export function mapGoogleAiStudioNetworkError(err: unknown): HelixError {
   if (err instanceof Error) {
     const category: HelixErrorCategory =
       err.name === 'AbortError' ? 'timeout' : 'connection_error';
@@ -56,7 +59,7 @@ export function mapGoogleNetworkError(err: unknown): HelixError {
 }
 
 export function mapGoogleError(err: unknown): HelixError {
-  return isHelixError(err) ? err : mapGoogleNetworkError(err);
+  return isHelixError(err) ? err : mapGoogleAiStudioNetworkError(err);
 }
 
 // Docu Gemini: https://ai.google.dev/gemini-api/docs/troubleshooting?hl=es-419

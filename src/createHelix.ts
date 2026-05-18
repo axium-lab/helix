@@ -1,13 +1,16 @@
-import type { HelixConfig } from "./core/index.js";
-import type { ResponsesCreateParams } from "./core/types/request.js";
-import type { HelixResponse } from "./core/types/responses/llm.response.js";
-import type { FilesCreateParams, FileObject } from "./core/types/responses/file.response.js";
-import type { ModelInfo } from "./core/types/models.js";
+import type { HelixConfig } from './core/index.js';
+import type { ResponsesCreateParams } from './core/types/request.js';
+import type { HelixResponse } from './core/types/responses/llm.response.js';
+import type {
+  FilesCreateParams,
+  FileObject,
+} from './core/types/responses/file.response.js';
+import type { ModelInfo } from './core/types/models.js';
 
-import { createOpenAIAdapter } from "./internal/providers/openai/openai.js";
-import { createAzureAdapter } from "./internal/providers/azure/azure.js";
-import { createCustomAdapter } from "./internal/providers/custom/custom.js";
-import { createGoogleAdapter } from "./internal/providers/google/google.js";
+import { createOpenAIAdapter } from './internal/providers/openai/openai.js';
+import { createAzureAdapter } from './internal/providers/azure/azure.js';
+import { createCustomAdapter } from './internal/providers/custom/custom.js';
+import { createGoogleAiStudioAdapter } from './internal/providers/google-aistudio/google-aistudio.js';
 
 export interface Helix {
   responses: {
@@ -27,13 +30,13 @@ export interface Helix {
 
 export function createHelix(config: HelixConfig): Helix {
   switch (config.provider) {
-    case "openai":
+    case 'openai':
       return createOpenAIAdapter(config);
-    case "azure":
+    case 'azure':
       return createAzureAdapter(config);
-    case "custom":
+    case 'custom':
       return createCustomAdapter(config);
-    case "google":
-      return createGoogleAdapter(config);
+    case 'google-aistudio':
+      return createGoogleAiStudioAdapter(config);
   }
 }

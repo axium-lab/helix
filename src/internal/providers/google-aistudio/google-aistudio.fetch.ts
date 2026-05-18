@@ -1,12 +1,15 @@
-import { mapGoogleHttpError, mapGoogleNetworkError } from './google.errors.js';
+import {
+  mapGoogleAiStudioHttpError,
+  mapGoogleAiStudioNetworkError,
+} from './google-aistudio.errors.js';
 
-export interface GoogleClient {
+export interface GoogleAiStudioClient {
   apiKey: string;
   baseUrl: string;
 }
 
-export async function googleFetch<T>(
-  client: GoogleClient,
+export async function googleAiStudioFetch<T>(
+  client: GoogleAiStudioClient,
   method: string,
   path: string,
   body?: unknown,
@@ -24,8 +27,7 @@ export async function googleFetch<T>(
       ...(body !== undefined && { body: JSON.stringify(body) }),
     });
   } catch (err) {
-    // Only conection errors, timeouts, etc. will be caught here. Errores HTTP no entran aquí.
-    throw mapGoogleNetworkError(err);
+    throw mapGoogleAiStudioNetworkError(err);
   }
 
   if (!res.ok) {
@@ -38,7 +40,7 @@ export async function googleFetch<T>(
         errorBody = text;
       }
     }
-    throw mapGoogleHttpError(res, errorBody);
+    throw mapGoogleAiStudioHttpError(res, errorBody);
   }
 
   // Gemini devuelve body vacío en DELETE — no parseamos si no hay nada.
