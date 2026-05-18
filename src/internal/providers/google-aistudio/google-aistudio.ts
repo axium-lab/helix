@@ -20,7 +20,7 @@ export function createGoogleAiStudioAdapter(config: GoogleConfig): Helix {
   };
 
   return {
-    responses: responsesHandler(client),
+    responses: responsesHandler(client, config.provider),
     files: {
       create: FAKE_ERROR,
       list: FAKE_ERROR,

@@ -1,4 +1,5 @@
 import {
+  HelixProviderKind,
   HelixResponse,
   ResponsesCreateParams,
 } from '../../../../core/index.js';
@@ -16,6 +17,7 @@ import {
 
 async function createResponse(
   client: GoogleAiStudioClient,
+  provider: HelixProviderKind,
   params: ResponsesCreateParams,
 ): Promise<HelixResponse> {
   try {
@@ -28,7 +30,7 @@ async function createResponse(
       body,
     );
 
-    return toHelixResponse(raw, { model: params.model });
+    return toHelixResponse(raw, provider);
   } catch (err) {
     throw mapGoogleError(err);
   }
@@ -36,8 +38,9 @@ async function createResponse(
 
 export function responsesHandler(
   client: GoogleAiStudioClient,
+  provider: HelixProviderKind,
 ): Helix['responses'] {
   return {
-    create: (params) => createResponse(client, params),
+    create: (params) => createResponse(client, provider, params),
   };
 }
