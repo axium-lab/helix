@@ -1,4 +1,5 @@
 import {
+  HelixProviderKind,
   HelixResponse,
   ResponsesCreateParams,
 } from '../../../../core/index.js';
@@ -16,8 +17,8 @@ import {
 
 async function createResponse(
   client: GoogleAiStudioClient,
+  provider: HelixProviderKind,
   params: ResponsesCreateParams,
-  provider: 'google-aistudio',
 ): Promise<HelixResponse> {
   try {
     const body = await toGoogleBody(client, params);
@@ -37,9 +38,9 @@ async function createResponse(
 
 export function responsesHandler(
   client: GoogleAiStudioClient,
-  provider: 'google-aistudio',
+  provider: HelixProviderKind,
 ): Helix['responses'] {
   return {
-    create: (params) => createResponse(client, params, provider),
+    create: (params) => createResponse(client, provider, params),
   };
 }

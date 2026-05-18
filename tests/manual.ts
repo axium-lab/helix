@@ -38,7 +38,7 @@ const helix = createHelix(config);
 // console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-// await runErrorScenarios(helix, config);
+await runErrorScenarios(helix, config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
