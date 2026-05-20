@@ -5,6 +5,7 @@ import type { Helix } from '../../../createHelix.js';
 import { handleResponse } from './azure.response.js';
 import { handleModels } from './azure.models.js';
 import { handleFiles } from './azure.files.js';
+import { sanitizeProviderConfig } from '../_shared/config.helpers.js';
 
 type AzureConfig = Extract<HelixConfig, { provider: 'azure' }>;
 
@@ -17,8 +18,10 @@ export function createAzureAdapter(config: AzureConfig): Helix {
 
   const models = handleModels(config);
 
+  const configClean = sanitizeProviderConfig(config);
+  
   return {
-    responses: handleResponse(client, config.provider),
+    responses: handleResponse(client, configClean),
     files: handleFiles(client),
     models,
     async test() {

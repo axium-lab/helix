@@ -5,6 +5,7 @@ import type { ModelInfo } from "../../../core/types/models.js";
 import { HelixObject } from "../../../core/types/helix-object.js";
 import { toHelixResponse, toOpenAIParams } from "../_shared/openai.mapper.js";
 import { customNotSupportedError, mapCustomError } from "./custom.errors.js";
+import { sanitizeProviderConfig } from "../_shared/config.helpers.js";
 
 type CustomConfig = Extract<HelixConfig, { provider: "custom" }>;
 
@@ -14,12 +15,15 @@ export function createCustomAdapter(config: CustomConfig): Helix {
     baseURL: config.baseUrl,
   });
 
+  const configClean = sanitizeProviderConfig(config);
+  
+
   return {
     responses: {
       async create(params) {
         try {
           const raw = await client.responses.create(toOpenAIParams(params));
-          return toHelixResponse(raw, config.provider);
+          return toHelixResponse(raw, configClean);
         } catch (err) {
           throw mapCustomError(err);
         }

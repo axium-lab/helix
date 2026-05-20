@@ -21,7 +21,7 @@ import type {
   GeminiPart,
   GeminiUsageMetadata,
 } from './google-aistudio.responses.types.js';
-import { HelixProviderKind } from '../../../../core/index.js';
+import type { HelixConfigClean } from '../../../../core/types/config.js';
 
 // Ejemplo de body Gemini (referencia rápida — para usar contra el endpoint REST)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ async function toGooglePart(
 // ── Gemini → Helix (response) ────────────────────────────────────────────────
 export function toHelixResponse(
   raw: GeminiGenerateContentResponse,
-  provider: HelixProviderKind,
+  config: HelixConfigClean,
 ): HelixResponse {
   // Los modelos actuales (2.x, 3.x) solo soportan 1 candidato.
   const candidate = raw.candidates?.[0];
@@ -205,7 +205,7 @@ export function toHelixResponse(
       : [],
     output_text: text,
     usage: toUsage(raw.usageMetadata),
-    metadata: { [provider]: raw },
+    metadata: { [config.provider]: raw },
   };
 }
 
