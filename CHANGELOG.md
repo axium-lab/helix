@@ -8,6 +8,10 @@ with pre-1.0 conventions: minor bumps signal BREAKING changes; patch bumps are s
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING:** `provider: "custom"` removed from `HelixConfig`. The OpenAI adapter already accepts an optional `baseUrl`, so any OpenAI-compatible endpoint can be reached via `provider: "openai"` with `baseUrl` set. Callers using `"custom"` must switch to `"openai"`; note that `files.*` will now hit the configured backend (which may not implement it) instead of throwing a typed `not_supported` error.
+
 ## [0.0.1] — 2026-04-29
 
 Initial test release. The public API is unstable and may change without warning before `0.1.0`. Not intended for production workloads.

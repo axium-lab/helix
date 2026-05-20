@@ -9,7 +9,6 @@ import type { ModelInfo } from './core/types/models.js';
 
 import { createOpenAIAdapter } from './internal/providers/openai/openai.js';
 import { createAzureAdapter } from './internal/providers/azure/azure.js';
-import { createCustomAdapter } from './internal/providers/custom/custom.js';
 import { createGoogleAiStudioAdapter } from './internal/providers/google-aistudio/google-aistudio.js';
 
 export interface Helix {
@@ -34,8 +33,6 @@ export function createHelix(config: HelixConfig): Helix {
       return createOpenAIAdapter(config);
     case 'azure':
       return createAzureAdapter(config);
-    case 'custom':
-      return createCustomAdapter(config);
     case 'google-aistudio':
       return createGoogleAiStudioAdapter(config);
   }

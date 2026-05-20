@@ -21,7 +21,7 @@ describe("HelixError — construction", () => {
   });
 
   it("httpStatus, requestId, meta are optional", () => {
-    const minimal = new HelixError({ category: "unknown", provider: "custom", message: "x" });
+    const minimal = new HelixError({ category: "unknown", provider: "openai", message: "x" });
     expect(minimal.httpStatus).toBeUndefined();
     expect(minimal.requestId).toBeUndefined();
     expect(minimal.meta).toBeUndefined();
