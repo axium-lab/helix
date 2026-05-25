@@ -4,6 +4,7 @@ import { modelsHandler } from './models/google-aistudio.models.js';
 import type { GoogleAiStudioClient } from './google-aistudio.fetch.js';
 import { responsesHandler } from './responses/google-aistudio.responses.js';
 import { filesHandler } from './files/google-aistudio.files.js';
+import { sanitizeProviderConfig } from '../_shared/config.helpers.js';
 
 type GoogleConfig = Extract<HelixConfig, { provider: 'google-aistudio' }>;
 
@@ -15,8 +16,11 @@ export function createGoogleAiStudioAdapter(config: GoogleConfig): Helix {
     baseUrl: (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ''),
   };
 
+    const configClean = sanitizeProviderConfig(config);
+  
+
   return {
-    responses: responsesHandler(client, config.provider),
+    responses: responsesHandler(client, configClean),
     files: filesHandler(client),
     models: modelsHandler(client),
     test: () =>

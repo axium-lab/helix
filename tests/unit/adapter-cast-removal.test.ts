@@ -38,7 +38,7 @@ describe("adapter parameter-cast removal — REQ-FP-3, REQ-FP-4", () => {
 // ADR-0007: responses.create cast MUST NOT exist anymore. Closes the carve-out
 // left by REQ-FP-6 in `helix-files-params-tightening`. Both the input cast and
 // the unsafe `as unknown as HelixResponse` output cast are forbidden in EVERY
-// adapter that speaks the OpenAI wire format (OpenAI, Azure, Custom).
+// adapter that speaks the OpenAI wire format (OpenAI, Azure).
 // ---------------------------------------------------------------------------
 
 const ADAPTERS_OPENAI_SHAPE = [
@@ -49,10 +49,6 @@ const ADAPTERS_OPENAI_SHAPE = [
   {
     name: "azure.ts",
     path: "../../src/internal/providers/azure/azure.ts",
-  },
-  {
-    name: "custom.ts",
-    path: "../../src/internal/providers/custom/custom.ts",
   },
 ];
 

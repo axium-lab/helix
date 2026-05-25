@@ -1,7 +1,7 @@
 {
   "name": "@axium-lab/helix",
   "version": "0.1.0",
-  "description": "Unified TypeScript interface for multiple LLM providers (OpenAI, Azure, custom, Vertex)",
+  "description": "Unified TypeScript interface for multiple LLM providers (OpenAI, Azure, Google AI Studio)",
   "license": "UNLICENSED",
   "type": "module",
   "author": "pierslabs",

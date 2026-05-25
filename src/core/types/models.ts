@@ -9,5 +9,5 @@ export interface ModelInfo {
   created: number;
   tools?: string[];
   display_name?: string;
-  owned_by?: string; // TODO - this should be provider "openai | azure | custom" or organization fine-tuned
+  owned_by?: string; // TODO - this should be provider "openai | azure | google-aistudio" or organization fine-tuned
 }

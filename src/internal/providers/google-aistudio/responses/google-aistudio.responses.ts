@@ -1,5 +1,4 @@
 import {
-  HelixProviderKind,
   HelixResponse,
   ResponsesCreateParams,
 } from '../../../../core/index.js';
@@ -10,6 +9,8 @@ import {
 } from '../google-aistudio.fetch.js';
 import { mapGoogleAiStudioError } from '../google-aistudio.errors.js';
 import type { GeminiGenerateContentResponse } from './google-aistudio.responses.types.js';
+import type { HelixConfigClean } from '../../../../core/types/config.js';
+
 import {
   toGoogleBody,
   toHelixResponse,
@@ -17,7 +18,7 @@ import {
 
 async function createResponse(
   client: GoogleAiStudioClient,
-  provider: HelixProviderKind,
+  config: HelixConfigClean,
   params: ResponsesCreateParams,
 ): Promise<HelixResponse> {
   try {
@@ -30,7 +31,7 @@ async function createResponse(
       body,
     );
 
-    return toHelixResponse(raw, provider);
+    return toHelixResponse(raw, config);
   } catch (err) {
     throw mapGoogleAiStudioError(err);
   }
@@ -38,9 +39,9 @@ async function createResponse(
 
 export function responsesHandler(
   client: GoogleAiStudioClient,
-  provider: HelixProviderKind,
+  config: HelixConfigClean,
 ): Helix['responses'] {
   return {
-    create: (params) => createResponse(client, provider, params),
+    create: (params) => createResponse(client, config, params),
   };
 }

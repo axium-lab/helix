@@ -12,7 +12,6 @@ import type {
   FileObject as OpenAIFileObject,
 } from 'openai/resources/files';
 
-import type { HelixProviderKind } from '../../../core/types/config.js';
 import type {
   HelixFinishReason,
   OutputContentPart,
@@ -28,6 +27,7 @@ import type {
 } from '../../../core/types/responses/file.response.js';
 import type { ResponsesCreateParams } from '../../../core/types/request.js';
 import { HelixObject } from '../../../core/types/helix-object.js';
+import type { HelixConfigClean } from '../../../core/types/config.js';
 
 const HELIX_FILE_PURPOSES: ReadonlySet<HelixFilePurpose> = new Set([
   'assistants',
@@ -76,7 +76,7 @@ export function toOpenAIParams(
 
 export function toHelixResponse(
   r: OpenAIResponse,
-  provider: HelixProviderKind,
+  config: HelixConfigClean,
 ): HelixResponse {
   const messages = r.output.filter(
     (item): item is ResponseOutputMessage => item.type === 'message',
@@ -114,7 +114,7 @@ export function toHelixResponse(
     })),
     output_text: r.output_text,
     usage: toHelixUsage(r.usage),
-    metadata: { [provider]: r },
+    metadata: { [config.provider]: r },
   };
 }
 

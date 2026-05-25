@@ -23,11 +23,11 @@ import {
 /**
  * Per-provider configuration consumed by `mapSdkError`. Captures the small
  * deltas between providers that share the OpenAI wire format (today: openai,
- * azure, custom) so the instanceof chain itself lives in ONE place.
+ * azure) so the instanceof chain itself lives in ONE place.
  *
  * - `provider`: the discriminator stamped on every emitted HelixError.
  * - `buildMeta`: returns the per-provider meta payload (e.g. openai → { body },
- *   custom → { upstream }, azure → { body, innererror? }).
+ *   azure → { body, innererror? }).
  * - `detectResponsibleAIViolation` (optional): override default content-filter detection
  *   on 400 BadRequest. Default: `code === "content_filter"`. Azure also accepts
  *   `innererror.code === "ResponsibleAIPolicyViolation"`.
