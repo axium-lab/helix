@@ -98,7 +98,7 @@ describe("createOpenAIAdapter — SDK client construction", () => {
     expect(OpenAI).toHaveBeenCalledWith(expect.objectContaining({ apiKey: "sk-test" }));
     expect(adapter).toBeDefined();
     expect(typeof adapter.responses.create).toBe("function");
-    expect(typeof adapter.test).toBe("function");
+    expect(typeof adapter.test.connection).toBe("function");
   });
 
   it("constructs OpenAI with { apiKey, baseURL } when baseUrl is set", () => {
@@ -249,7 +249,7 @@ describe("createOpenAIAdapter — test()", () => {
     mockModelsList.mockResolvedValue(MODELS_LIST_OK);
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
-    const result = await adapter.test();
+    const result = await adapter.test.connection();
     expect(result).toBe(true);
   });
 
@@ -257,7 +257,7 @@ describe("createOpenAIAdapter — test()", () => {
     mockModelsList.mockRejectedValue(new Error("401 Invalid API key"));
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
-    const result = await adapter.test();
+    const result = await adapter.test.connection();
     expect(result).toBe(false);
   });
 
@@ -265,6 +265,6 @@ describe("createOpenAIAdapter — test()", () => {
     mockModelsList.mockRejectedValue(new Error("401 Invalid API key"));
     const adapter = createOpenAIAdapter({ provider: "openai", apiKey: "sk-test" });
 
-    await expect(adapter.test()).resolves.toBe(false);
+    await expect(adapter.test.connection()).resolves.toBe(false);
   });
 });

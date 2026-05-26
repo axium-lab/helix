@@ -24,13 +24,15 @@ export function createAzureAdapter(config: AzureConfig): Helix {
     responses: handleResponse(client, configClean),
     files: handleFiles(client),
     models,
-    async test() {
-      try {
-        await models.list();
-        return true;
-      } catch {
-        return false;
-      }
+    test: {
+      async connection() {
+        try {
+          await models.list();
+          return true;
+        } catch {
+          return false;
+        }
+      },
     },
   };
 }

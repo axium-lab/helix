@@ -59,7 +59,7 @@ describe.skipIf(!hasAzure)("integration: azure", () => {
       apiVersion: env("HELIX_AZURE_API_VERSION")!,
     });
 
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(true);
   });
 

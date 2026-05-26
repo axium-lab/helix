@@ -23,7 +23,7 @@ describe("azure test() — behavioral regression (REQ-AZ-005 replacement)", () =
     ));
 
     const helix = createHelix(BASE_CONFIG);
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(true);
   });
 
@@ -37,7 +37,7 @@ describe("azure test() — behavioral regression (REQ-AZ-005 replacement)", () =
     ));
 
     const helix = createHelix(BASE_CONFIG);
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(false);
   });
 
@@ -47,7 +47,7 @@ describe("azure test() — behavioral regression (REQ-AZ-005 replacement)", () =
     ));
 
     const helix = createHelix(BASE_CONFIG);
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(false);
   });
 
@@ -57,7 +57,7 @@ describe("azure test() — behavioral regression (REQ-AZ-005 replacement)", () =
     ));
 
     const helix = createHelix(BASE_CONFIG);
-    await expect(helix.test()).resolves.toBe(false);
+    await expect(helix.test.connection()).resolves.toBe(false);
   });
 
   it("resolves true for empty deployments list (models.list does not throw on empty)", async () => {
@@ -70,7 +70,7 @@ describe("azure test() — behavioral regression (REQ-AZ-005 replacement)", () =
     ));
 
     const helix = createHelix(BASE_CONFIG);
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(true);
   });
 });

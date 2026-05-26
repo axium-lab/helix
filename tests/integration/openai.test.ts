@@ -28,7 +28,7 @@ describe.skipIf(!hasOpenAI)("integration: openai", () => {
       apiKey: process.env.HELIX_OPENAI_API_KEY!,
     });
 
-    const result = await helix.test();
+    const result = await helix.test.connection();
     expect(result).toBe(true);
   });
 
