@@ -12,36 +12,24 @@ import { runErrorScenarios } from './manual-errors.js';
 // };
 
 // GOOGLE
-const config: HelixConfig = {
-  provider: 'google-aistudio',
-  apiKey: process.env.HELIX_GOOGLE_API_KEY!,
-  baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
-};
-
-// // OPENAI
 // const config: HelixConfig = {
-//   provider: 'google',
+//   provider: 'google-aistudio',
 //   apiKey: process.env.HELIX_GOOGLE_API_KEY!,
-// };
-
-// OPENAI
-// const config: HelixConfig = {
-//   provider: 'openai',
-//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+//   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
 // };
 
 // // OPENAI
-// const config: HelixConfig = {
-//   provider: 'openai',
-//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
-// };
+const config: HelixConfig = {
+  provider: 'openai',
+  apiKey: process.env.HELIX_OPENAI_API_KEY!,
+};
 
 const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-// const ok = await helix.test();
-// console.log('test:', ok);
+const ok = await helix.test.connection();
+console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
 await runErrorScenarios(helix, config);
