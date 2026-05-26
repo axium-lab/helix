@@ -95,7 +95,7 @@ describe("createAzureAdapter — SDK client construction", () => {
     );
     expect(adapter).toBeDefined();
     expect(typeof adapter.responses.create).toBe("function");
-    expect(typeof adapter.test).toBe("function");
+    expect(typeof adapter.test.connection).toBe("function");
   });
 });
 
@@ -255,7 +255,7 @@ describe("createAzureAdapter — test()", () => {
       apiVersion: API_VERSION,
     });
 
-    const result = await adapter.test();
+    const result = await adapter.test.connection();
     expect(result).toBe(true);
   });
 
@@ -273,7 +273,7 @@ describe("createAzureAdapter — test()", () => {
       apiVersion: API_VERSION,
     });
 
-    const result = await adapter.test();
+    const result = await adapter.test.connection();
     expect(result).toBe(false);
   });
 
@@ -287,6 +287,6 @@ describe("createAzureAdapter — test()", () => {
       apiVersion: API_VERSION,
     });
 
-    await expect(adapter.test()).resolves.toBe(false);
+    await expect(adapter.test.connection()).resolves.toBe(false);
   });
 });

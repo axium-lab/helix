@@ -23,10 +23,12 @@ export function createGoogleAiStudioAdapter(config: GoogleConfig): Helix {
     responses: responsesHandler(client, configClean),
     files: filesHandler(client),
     models: modelsHandler(client),
-    test: () =>
-      modelsHandler(client)
-        .list()
-        .then(() => true)
-        .catch(() => false),
+    test: {
+      connection: () =>
+        modelsHandler(client)
+          .list()
+          .then(() => true)
+          .catch(() => false),
+    },
   };
 }
