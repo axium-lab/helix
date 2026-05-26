@@ -6,7 +6,7 @@ import type {
   FileObject,
 } from './core/types/responses/file.response.js';
 import type { ModelInfo } from './core/types/models.js';
-import type { HelixError } from './core/errors/helix-error.js';
+import { HelixError } from './core/errors/helix-error.js';
 
 import { createOpenAIAdapter } from './internal/providers/openai/openai.js';
 import { createAzureAdapter } from './internal/providers/azure/azure.js';
@@ -15,6 +15,8 @@ import { mapOpenAIError } from './internal/providers/openai/openai.errors.js';
 import { mapAzureError } from './internal/providers/azure/azure.errors.js';
 import { mapGoogleAiStudioError } from './internal/providers/google-aistudio/google-aistudio.errors.js';
 import { wrapError } from './internal/providers/_shared/wrap-error.js';
+import { createVertexAdapter } from './internal/providers/vertex/vertex.js';
+import { mapVertexError } from './internal/providers/vertex/vertex.errors.js';
 
 export interface Helix {
   responses: {
@@ -38,6 +40,7 @@ const errorMappers = {
   openai: mapOpenAIError,
   azure: mapAzureError,
   'google-aistudio': mapGoogleAiStudioError,
+  vertex: mapVertexError,
 } as const satisfies Record<HelixProviderKind, (err: unknown) => HelixError>;
 
 export function createHelix(config: HelixConfig): Helix {
@@ -64,5 +67,7 @@ function buildAdapter(config: HelixConfig): Helix {
       return createAzureAdapter(config);
     case 'google-aistudio':
       return createGoogleAiStudioAdapter(config);
+    case 'vertex':
+      return createVertexAdapter(config);
   }
 }
