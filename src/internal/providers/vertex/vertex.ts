@@ -2,6 +2,8 @@ import { GoogleGenAI } from '@google/genai';
 import { HelixConfig } from '../../../core/index.js';
 import { Helix } from '../../../createHelix.js';
 import { handleModels } from './vertex.models.js';
+import { responsesHandler } from './vertex.responses.js';
+import { sanitizeProviderConfig } from '../_shared/config.helpers.js';
 
 type VertexConfig = Extract<HelixConfig, { provider: 'vertex' }>;
 
@@ -15,12 +17,10 @@ export function createVertexAdapter(config: VertexConfig): Helix {
     },
   });
 
+  const configClean = sanitizeProviderConfig(config);
+
   return {
-    responses: {
-      create: async () => {
-        throw new Error('Vertex provider is not yet supported');
-      },
-    },
+    responses: responsesHandler(client, configClean),
     files: {
       create: async () => {
         throw new Error('Vertex provider is not yet supported');

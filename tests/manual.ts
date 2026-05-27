@@ -49,13 +49,13 @@ const helix = createHelix(config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
-const models = await helix.models.list();
-console.log('models count:', models);
+// const models = await helix.models.list();
+// console.log('models count:', models);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
 // const res = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
+//   model: 'gemini-2.5-flash',
 //   instructions: 'Be concise.',
 //   input: [
 //     {
@@ -75,41 +75,41 @@ console.log('models count:', models);
 
 // ── optional: structured output (json_schema) ────────────────────────────────
 
-// const structured = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
-//   instructions: 'Devuelve solo JSON válido conforme al schema.',
-//   input: [
-//     {
-//       role: 'user',
-//       content: [
-//         {
-//           type: 'input_text',
-//           text: 'Inventate un libro con título, personajes y resumen.',
-//         },
-//       ],
-//     },
-//   ],
-//   text: {
-//     format: {
-//       type: 'json_schema',
-//       name: 'book_schema',
-//       schema: {
-//         type: 'object',
-//         properties: {
-//           titulo: { type: 'string' },
-//           personajes: { type: 'array', items: { type: 'string' } },
-//           resumen: { type: 'string' },
-//         },
-//         required: ['titulo', 'personajes', 'resumen'],
-//         additionalProperties: false,
-//       },
-//       strict: true,
-//     },
-//   },
-//   max_output_tokens: 1500,
-//   temperature: 0.7,
-// });
-// console.log(structured);
+const structured = await helix.responses.create({
+  model: 'gemini-2.5-flash',
+  instructions: 'Devuelve solo JSON válido conforme al schema.',
+  input: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'input_text',
+          text: 'Inventate un libro con título, personajes y resumen.',
+        },
+      ],
+    },
+  ],
+  text: {
+    format: {
+      type: 'json_schema',
+      name: 'book_schema',
+      schema: {
+        type: 'object',
+        properties: {
+          titulo: { type: 'string' },
+          personajes: { type: 'array', items: { type: 'string' } },
+          resumen: { type: 'string' },
+        },
+        required: ['titulo', 'personajes', 'resumen'],
+        additionalProperties: false,
+      },
+      strict: true,
+    },
+  },
+  max_output_tokens: 1500,
+  temperature: 0.7,
+});
+console.log(structured);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 
