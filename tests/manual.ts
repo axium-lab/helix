@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { HelixConfig } from '../src/core/index.js';
 import { createHelix } from '../src/createHelix.js';
-import { runErrorScenarios } from './manual-errors.js';
+// import { runErrorScenarios } from './manual-errors.js';
 
 // AZURE
 // const config: HelixConfig = {
@@ -18,26 +19,38 @@ import { runErrorScenarios } from './manual-errors.js';
 //   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
 // };
 
-// // OPENAI
+// OPENAI
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
+
+// VERTEX
+const credentials = JSON.parse(
+  readFileSync(process.env.HELIX_VERTEX_KEY_FILE ?? './key-axium.json', 'utf8'),
+);
+
 const config: HelixConfig = {
-  provider: 'openai',
-  apiKey: process.env.HELIX_OPENAI_API_KEY!,
+  provider: 'vertex',
+  projectId: process.env.HELIX_VERTEX_PROJECT_ID!,
+  location: process.env.HELIX_VERTEX_LOCATION!,
+  credentials,
 };
 
 const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-const ok = await helix.test.connection();
-console.log('test:', ok);
+// const ok = await helix.test.connection();
+// console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-await runErrorScenarios(helix, config);
+// await runErrorScenarios(helix, config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
-// const models = await helix.models.list();
-// console.log('models count:', models);
+const models = await helix.models.list();
+console.log('models count:', models);
 
 // ── optional: happy response ─────────────────────────────────────────────────
 
