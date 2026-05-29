@@ -33,8 +33,10 @@ const credentials = JSON.parse(
 const config: HelixConfig = {
   provider: 'vertex',
   projectId: process.env.HELIX_VERTEX_PROJECT_ID!,
-  location: process.env.HELIX_VERTEX_LOCATION!,
   credentials,
+  // Bucket
+  location: process.env.HELIX_VERTEX_LOCATION!,
+  bucketUri: process.env.HELIX_VERTEX_BUCKET_URI!,
 };
 
 const helix = createHelix(config);
@@ -75,48 +77,48 @@ const helix = createHelix(config);
 
 // ── optional: structured output (json_schema) ────────────────────────────────
 
-const structured = await helix.responses.create({
-  model: 'gemini-2.5-flash',
-  instructions: 'Devuelve solo JSON válido conforme al schema.',
-  input: [
-    {
-      role: 'user',
-      content: [
-        {
-          type: 'input_text',
-          text: 'Inventate un libro con título, personajes y resumen.',
-        },
-      ],
-    },
-  ],
-  text: {
-    format: {
-      type: 'json_schema',
-      name: 'book_schema',
-      schema: {
-        type: 'object',
-        properties: {
-          titulo: { type: 'string' },
-          personajes: { type: 'array', items: { type: 'string' } },
-          resumen: { type: 'string' },
-        },
-        required: ['titulo', 'personajes', 'resumen'],
-        additionalProperties: false,
-      },
-      strict: true,
-    },
-  },
-  max_output_tokens: 1500,
-  temperature: 0.7,
-});
-console.log(structured);
+// const structured = await helix.responses.create({
+//   model: 'gemini-2.5-flash',
+//   instructions: 'Devuelve solo JSON válido conforme al schema.',
+//   input: [
+//     {
+//       role: 'user',
+//       content: [
+//         {
+//           type: 'input_text',
+//           text: 'Inventate un libro con título, personajes y resumen.',
+//         },
+//       ],
+//     },
+//   ],
+//   text: {
+//     format: {
+//       type: 'json_schema',
+//       name: 'book_schema',
+//       schema: {
+//         type: 'object',
+//         properties: {
+//           titulo: { type: 'string' },
+//           personajes: { type: 'array', items: { type: 'string' } },
+//           resumen: { type: 'string' },
+//         },
+//         required: ['titulo', 'personajes', 'resumen'],
+//         additionalProperties: false,
+//       },
+//       strict: true,
+//     },
+//   },
+//   max_output_tokens: 1500,
+//   temperature: 0.7,
+// });
+// console.log(structured);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 
-// const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
-// const file = new File([bytes], 'axium.pdf', {
-//   type: 'application/pdf',
-// });
+const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
+const file = new File([bytes], 'axium.pdf', {
+  type: 'application/pdf',
+});
 
 // const created = await helix.files.create({ file });
 // console.log('created:', created);
@@ -124,24 +126,29 @@ console.log(structured);
 // const files = await helix.files.list();
 // console.log('files:', files);
 
-// const fileById = await helix.files.get(created.id);
+// const fileById = await helix.files.get(
+//   'gs://helix-test/helix/877abf68-aff3-4970-aa38-7cf2a2851c30',
+// );
 // console.log('fileById:', fileById);
 
-// const resWithFile = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
-//   input: [
-//     {
-//       role: 'user',
-//       content: [
-//         { type: 'input_file', file_id: created.id },
-//         { type: 'input_text', text: '¿Qué contiene este archivo?' },
-//       ],
-//     },
-//   ],
-//   max_output_tokens: 200,
-//   temperature: 0.2,
-// });
-// console.log('resWithFileContent:', resWithFile);
+const resWithFile = await helix.responses.create({
+  model: 'gemini-2.5-flash',
+  input: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'input_file',
+          file_data: file,
+        },
+        { type: 'input_text', text: '¿Qué contiene este archivo?' },
+      ],
+    },
+  ],
+  max_output_tokens: 200,
+  temperature: 0.2,
+});
+console.log('resWithFileContent:', resWithFile);
 
-// const deleted = await helix.files.delete('files/sjt2iv0uax36');
+// const deleted = await helix.files.delete(created.id);
 // console.log('deleted:', deleted);
