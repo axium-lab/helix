@@ -1,8 +1,6 @@
-import { Storage } from '@google-cloud/storage';
 import { GoogleGenAI } from '@google/genai';
 
 import { HelixConfig } from '../../../core/index.js';
-import { HelixError } from '../../../core/errors/helix-error.js';
 import { Helix } from '../../../createHelix.js';
 import { sanitizeProviderConfig } from '../_shared/config.helpers.js';
 import { filesHandler } from './vertex.files.js';
