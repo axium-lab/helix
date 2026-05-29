@@ -5,7 +5,7 @@ import { HelixConfig } from '../../../core/index.js';
 import { HelixError } from '../../../core/errors/helix-error.js';
 import { Helix } from '../../../createHelix.js';
 import { sanitizeProviderConfig } from '../_shared/config.helpers.js';
-import { filesHandler, type GcsLocation } from './vertex.files.js';
+import { filesHandler } from './vertex.files.js';
 import { handleModels } from './vertex.models.js';
 import { responsesHandler } from './vertex.responses.js';
 
@@ -22,25 +22,11 @@ export function createVertexAdapter(config: VertexConfig): Helix {
     },
   });
 
-  // Storage para manejo de archivos (si bucketUri está presente)
-  let storage: Storage | null = null;
-  let loc: GcsLocation | null = null;
-
-  if (config.bucketUri) {
-    storage = new Storage({
-      projectId: config.projectId,
-      credentials: {
-        client_email: config.credentials.client_email,
-        private_key: config.credentials.private_key,
-      },
-    });
-  }
-
   const configClean = sanitizeProviderConfig(config);
 
   return {
     responses: responsesHandler(client, configClean),
-    files: filesHandler(storage, loc),
+    files: filesHandler(),
     models: {
       list: handleModels(client).list,
     },
