@@ -157,7 +157,7 @@ async function toGooglePart(
 ): Promise<GeminiPart> {
   if (p.type === 'input_text') return { text: p.text };
 
-  const file = await fetchGeminiFile(client, p.file_id);
+  const file = await fetchGeminiFile(client, p.file_id!);
   return { fileData: { mimeType: file.mimeType, fileUri: file.uri } };
 }
 

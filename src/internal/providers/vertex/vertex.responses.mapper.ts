@@ -20,17 +20,17 @@ import type {
   ResponsesCreateParams,
 } from '../../../core/types/request.js';
 import type { HelixConfigClean } from '../../../core/types/config.js';
-import { HelixError } from '../../../core/errors/helix-error.js';
 import { HelixObject } from '../../../core/types/helix-object.js';
+import { HelixError } from '../../../core/index.js';
 
 // Helix → Vertex SDK GenerateContentParameters.
 // Vertex AI uses the same Gemini wire format as Google AI Studio:
 //   - `systemInstruction` lives separately from `contents[]`
 //   - role `assistant` (Helix/OpenAI) → `model` (Gemini)
 //   - structured output via `responseMimeType` + `responseSchema`
-export function toGenerateContentParams(
+export async function toGenerateContentParams(
   params: ResponsesCreateParams,
-): GenerateContentParameters {
+): Promise<GenerateContentParameters> {
   const systemTexts: string[] = [];
   if (params.instructions) systemTexts.push(params.instructions);
 
@@ -48,7 +48,7 @@ export function toGenerateContentParams(
 
     contents.push({
       role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: msg.content.map(toVertexPart),
+      parts: await Promise.all(msg.content.map(toVertexPart)),
     });
   }
 
@@ -79,16 +79,38 @@ export function toGenerateContentParams(
   };
 }
 
-function toVertexPart(p: InputContentPart): Part {
+// Vertex acepta archivos como `inlineData` (base64 + mime). El caller pasa un
+// `File`; helix extrae bytes y mime internamente.
+//
+// `file_id` no se soporta: Vertex requiere `mimeType` junto al `fileUri` y la
+// convención de OpenAI no lo expone como campo separado. El caller que tenga
+// archivos en GCS los descarga y arma un File para mandar inline.
+async function toVertexPart(p: InputContentPart): Promise<Part> {
   if (p.type === 'input_text') return { text: p.text };
 
-  // Vertex files require a `gs://...` URI obtained via Vertex's files API,
-  // which is not implemented yet. Fail fast rather than send a malformed request.
+  if (p.file_data instanceof File) {
+    const base64 = Buffer.from(await p.file_data.arrayBuffer()).toString('base64');
+    return {
+      inlineData: {
+        data: base64,
+        mimeType: p.file_data.type || 'application/octet-stream',
+      },
+    };
+  }
+
+  if (p.file_id !== undefined) {
+    throw new HelixError({
+      category: 'invalid_request',
+      provider: 'vertex',
+      message:
+        'helix-lib: Vertex does not support `file_id` in input_file. Use `file_data` with a `File` object.',
+    });
+  }
+
   throw new HelixError({
     category: 'invalid_request',
     provider: 'vertex',
-    message:
-      'helix-lib: Vertex provider does not support input_file yet (Cloud Storage / files API integration is pending).',
+    message: 'helix-lib: input_file requires `file_data` (a `File` object).',
   });
 }
 

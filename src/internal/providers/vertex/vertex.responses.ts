@@ -17,7 +17,7 @@ async function createResponse(
   params: ResponsesCreateParams,
 ): Promise<HelixResponse> {
   try {
-    const vertexSDKParams = toGenerateContentParams(params);
+    const vertexSDKParams = await toGenerateContentParams(params);
 
     // Para generacion de streaming, se deberia usar client.models.generateContentStream()
     const raw = await client.models.generateContent(vertexSDKParams);

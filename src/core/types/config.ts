@@ -24,6 +24,7 @@ type HelixConfigBase =
       projectId: string;
       location: string;
       credentials: VertexServiceAccountCredentials;
+      bucketUri?: string;
     };
 
 export type HelixConfig = HelixConfigBase & { apiKey?: string };
