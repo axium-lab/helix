@@ -38,6 +38,7 @@
     "test:integration": "vitest run tests/integration"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.19.0",
     "@google/genai": "^2.6.0",
     "openai": "^6.0.0"
   },
