@@ -115,19 +115,19 @@ const helix = createHelix(config);
 
 // ── optional: files ──────────────────────────────────────────────────────────
 
-const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
-const file = new File([bytes], 'axium.pdf', {
-  type: 'application/pdf',
-});
+// const bytes = await readFile(new URL('./files/axium.pdf', import.meta.url));
+// const file = new File([bytes], 'axium.pdf', {
+//   type: 'application/pdf',
+// });
 
 // const created = await helix.files.create({ file });
 // console.log('created:', created);
 
-// const files = await helix.files.list();
-// console.log('files:', files);
+const files = await helix.files.list();
+console.log('files:', files);
 
 // const fileById = await helix.files.get(
-//   'gs://helix-test/helix/877abf68-aff3-4970-aa38-7cf2a2851c30',
+//   'gs://axium-test/helix/ceb1048f-ee2b-43cc-a87e-0cb44ee82dbf',
 // );
 // console.log('fileById:', fileById);
 
@@ -139,7 +139,8 @@ const resWithFile = await helix.responses.create({
       content: [
         {
           type: 'input_file',
-          file_data: file,
+          file_id:
+            'gs://axium-test/helix/04f1f5c6-46a1-4d40-a1d9-c6c3a68a634f.pdf',
         },
         { type: 'input_text', text: '¿Qué contiene este archivo?' },
       ],
@@ -150,5 +151,7 @@ const resWithFile = await helix.responses.create({
 });
 console.log('resWithFileContent:', resWithFile);
 
-// const deleted = await helix.files.delete(created.id);
+// const deleted = await helix.files.delete(
+//   'gs://axium-test/helix/ceb1048f-ee2b-43cc-a87e-0cb44ee82dbf',
+// );
 // console.log('deleted:', deleted);

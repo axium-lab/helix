@@ -23,6 +23,21 @@ export function mapVertexError(err: unknown): HelixError {
 
   if (err instanceof ApiError) return mapApiError(err);
 
+  // `@google-cloud/storage` (GCS) throws its OWN error type, not @google/genai's
+  // ApiError.å
+  const gcsStatus = extractHttpStatus(err);
+  if (gcsStatus !== undefined) {
+    const message =
+      err instanceof Error ? err.message : 'helix-lib: storage error';
+    return new HelixError({
+      category: categorize(gcsStatus, undefined, message),
+      provider: PROVIDER,
+      message,
+      httpStatus: gcsStatus,
+      cause: err,
+    });
+  }
+
   if (err instanceof Error) {
     const category: HelixErrorCategory =
       err.name === 'AbortError' ? 'timeout' : 'connection_error';
@@ -69,6 +84,21 @@ function extractGoogleErrorObject(
     }
   } catch {
     // message no es JSON — ignoramos
+  }
+  return undefined;
+}
+
+function extractHttpStatus(err: unknown): number | undefined {
+  if (!err || typeof err !== 'object') return undefined;
+  const e = err as {
+    code?: unknown;
+    status?: unknown;
+    response?: { status?: unknown };
+  };
+  for (const candidate of [e.code, e.status, e.response?.status]) {
+    if (typeof candidate === 'number' && candidate >= 100 && candidate < 600) {
+      return candidate;
+    }
   }
   return undefined;
 }

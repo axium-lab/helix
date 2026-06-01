@@ -13,24 +13,21 @@ import type {
   HelixResponse,
   HelixResponseStatus,
   HelixUsage,
-} from '../../../core/types/responses/llm.response.js';
+} from '../../../../core/types/responses/llm.response.js';
 import type {
   InputContentPart,
   InputText,
   ResponsesCreateParams,
-} from '../../../core/types/request.js';
-import type { HelixConfigClean } from '../../../core/types/config.js';
-import { HelixObject } from '../../../core/types/helix-object.js';
-import { HelixError } from '../../../core/index.js';
+} from '../../../../core/types/request.js';
+import type { HelixConfigClean } from '../../../../core/types/config.js';
+import { HelixObject } from '../../../../core/types/helix-object.js';
+import { HelixError } from '../../../../core/index.js';
 
 // Helix → Vertex SDK GenerateContentParameters.
-// Vertex AI uses the same Gemini wire format as Google AI Studio:
-//   - `systemInstruction` lives separately from `contents[]`
-//   - role `assistant` (Helix/OpenAI) → `model` (Gemini)
-//   - structured output via `responseMimeType` + `responseSchema`
-export async function toGenerateContentParams(
+export function toGenerateContentParams(
   params: ResponsesCreateParams,
-): Promise<GenerateContentParameters> {
+  mimeMap: Map<string, string> = new Map(),
+): GenerateContentParameters {
   const systemTexts: string[] = [];
   if (params.instructions) systemTexts.push(params.instructions);
 
@@ -42,13 +39,15 @@ export async function toGenerateContentParams(
         .filter((p): p is InputText => p.type === 'input_text')
         .map((p) => p.text)
         .join('');
+
       systemTexts.push(text);
+
       continue;
     }
 
     contents.push({
       role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: await Promise.all(msg.content.map(toVertexPart)),
+      parts: msg.content.map((p) => toVertexPart(p, mimeMap)),
     });
   }
 
@@ -57,9 +56,11 @@ export async function toGenerateContentParams(
   if (systemTexts.length > 0) {
     config.systemInstruction = systemTexts.join('\n\n');
   }
+
   if (params.temperature !== undefined) {
     config.temperature = params.temperature;
   }
+
   if (params.max_output_tokens !== undefined) {
     config.maxOutputTokens = params.max_output_tokens;
   }
@@ -79,39 +80,32 @@ export async function toGenerateContentParams(
   };
 }
 
-// Vertex acepta archivos como `inlineData` (base64 + mime). El caller pasa un
-// `File`; helix extrae bytes y mime internamente.
-//
-// `file_id` no se soporta: Vertex requiere `mimeType` junto al `fileUri` y la
-// convención de OpenAI no lo expone como campo separado. El caller que tenga
-// archivos en GCS los descarga y arma un File para mandar inline.
-async function toVertexPart(p: InputContentPart): Promise<Part> {
+// Vertex resolves files exclusively through GCS: upload via `files.create`,
+// then reference the returned `gs://` URI as `file_id`. Inline `file_data` is
+// not accepted — the file must live in the bucket.
+function toVertexPart(p: InputContentPart, mimeMap: Map<string, string>): Part {
   if (p.type === 'input_text') return { text: p.text };
 
-  if (p.file_data instanceof File) {
-    const base64 = Buffer.from(await p.file_data.arrayBuffer()).toString('base64');
-    return {
-      inlineData: {
-        data: base64,
-        mimeType: p.file_data.type || 'application/octet-stream',
-      },
-    };
-  }
-
-  if (p.file_id !== undefined) {
+  if (p.file_id === undefined) {
     throw new HelixError({
       category: 'invalid_request',
       provider: 'vertex',
       message:
-        'helix-lib: Vertex does not support `file_id` in input_file. Use `file_data` with a `File` object.',
+        'helix-lib: Vertex requires `file_id` (a gs:// URI from files.create); inline `file_data` is not supported.',
     });
   }
 
-  throw new HelixError({
-    category: 'invalid_request',
-    provider: 'vertex',
-    message: 'helix-lib: input_file requires `file_data` (a `File` object).',
-  });
+  const mimeType = mimeMap.get(p.file_id);
+  if (!mimeType) {
+    throw new HelixError({
+      category: 'invalid_request',
+      provider: 'vertex',
+      message:
+        'helix-lib: file_id requires bucketUri to be set in HelixConfig.vertex.',
+    });
+  }
+
+  return { fileData: { fileUri: p.file_id, mimeType } };
 }
 
 // Gemini uses OpenAPI 3.0 (not JSON Schema). `additionalProperties` is rejected
@@ -170,45 +164,44 @@ export function toHelixResponse(
   };
 }
 
+// Finish reasons where Gemini cut the model off via a safety/content filter.
+// Single source of truth — both `toStatus` and `toHelixFinishReason` read it.
+const CONTENT_FILTER_REASONS: SdkFinishReason[] = [
+  SdkFinishReason.SAFETY,
+  SdkFinishReason.RECITATION,
+  SdkFinishReason.BLOCKLIST,
+  SdkFinishReason.PROHIBITED_CONTENT,
+  SdkFinishReason.SPII,
+  SdkFinishReason.IMAGE_SAFETY,
+  SdkFinishReason.IMAGE_PROHIBITED_CONTENT,
+  SdkFinishReason.IMAGE_RECITATION,
+];
+
 function toStatus(reason: SdkFinishReason | undefined): HelixResponseStatus {
-  switch (reason) {
-    case SdkFinishReason.STOP:
-    case SdkFinishReason.FINISH_REASON_UNSPECIFIED:
-    case undefined:
-      return 'completed';
-    case SdkFinishReason.MAX_TOKENS:
-    case SdkFinishReason.SAFETY:
-    case SdkFinishReason.RECITATION:
-    case SdkFinishReason.BLOCKLIST:
-    case SdkFinishReason.PROHIBITED_CONTENT:
-    case SdkFinishReason.SPII:
-    case SdkFinishReason.IMAGE_SAFETY:
-    case SdkFinishReason.IMAGE_PROHIBITED_CONTENT:
-    case SdkFinishReason.IMAGE_RECITATION:
-      return 'incomplete';
-    default:
-      return 'failed';
+  if (
+    reason === undefined ||
+    reason === SdkFinishReason.STOP ||
+    reason === SdkFinishReason.FINISH_REASON_UNSPECIFIED
+  ) {
+    return 'completed';
   }
+  if (
+    reason === SdkFinishReason.MAX_TOKENS ||
+    CONTENT_FILTER_REASONS.includes(reason)
+  ) {
+    return 'incomplete';
+  }
+  return 'failed';
 }
 
 function toHelixFinishReason(
   reason: SdkFinishReason | undefined,
 ): HelixFinishReason | null {
-  switch (reason) {
-    case SdkFinishReason.MAX_TOKENS:
-      return 'max_tokens';
-    case SdkFinishReason.SAFETY:
-    case SdkFinishReason.RECITATION:
-    case SdkFinishReason.BLOCKLIST:
-    case SdkFinishReason.PROHIBITED_CONTENT:
-    case SdkFinishReason.SPII:
-    case SdkFinishReason.IMAGE_SAFETY:
-    case SdkFinishReason.IMAGE_PROHIBITED_CONTENT:
-    case SdkFinishReason.IMAGE_RECITATION:
-      return 'content_filter';
-    default:
-      return null;
+  if (reason === SdkFinishReason.MAX_TOKENS) return 'max_tokens';
+  if (reason !== undefined && CONTENT_FILTER_REASONS.includes(reason)) {
+    return 'content_filter';
   }
+  return null;
 }
 
 function toUsage(
