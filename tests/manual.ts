@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { HelixConfig } from '../src/core/index.js';
 import { createHelix } from '../src/createHelix.js';
-import { runErrorScenarios } from './manual-errors.js';
+// import { runErrorScenarios } from './manual-errors.js';
 
 // AZURE
 // const config: HelixConfig = {
@@ -18,21 +19,35 @@ import { runErrorScenarios } from './manual-errors.js';
 //   baseUrl: process.env.HELIX_GOOGLE_BASE_URL!,
 // };
 
-// // OPENAI
+// OPENAI
+// const config: HelixConfig = {
+//   provider: 'openai',
+//   apiKey: process.env.HELIX_OPENAI_API_KEY!,
+// };
+
+// VERTEX
+const credentials = JSON.parse(
+  readFileSync(process.env.HELIX_VERTEX_KEY_FILE ?? './key-axium.json', 'utf8'),
+);
+
 const config: HelixConfig = {
-  provider: 'openai',
-  apiKey: process.env.HELIX_OPENAI_API_KEY!,
+  provider: 'vertex',
+  projectId: process.env.HELIX_VERTEX_PROJECT_ID!,
+  credentials,
+  // Bucket
+  location: process.env.HELIX_VERTEX_LOCATION!,
+  bucketUri: process.env.HELIX_VERTEX_BUCKET_URI!,
 };
 
 const helix = createHelix(config);
 
 // ── happy path ──────────────────────────────────────────────────────────────
 
-const ok = await helix.test.connection();
-console.log('test:', ok);
+// const ok = await helix.test.connection();
+// console.log('test:', ok);
 
 // ── error scenarios ─────────────────────────────────────────────────────────
-await runErrorScenarios(helix, config);
+// await runErrorScenarios(helix, config);
 
 // ── optional: list models ────────────────────────────────────────────────────
 
@@ -42,7 +57,7 @@ await runErrorScenarios(helix, config);
 // ── optional: happy response ─────────────────────────────────────────────────
 
 // const res = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
+//   model: 'gemini-2.5-flash',
 //   instructions: 'Be concise.',
 //   input: [
 //     {
@@ -63,7 +78,7 @@ await runErrorScenarios(helix, config);
 // ── optional: structured output (json_schema) ────────────────────────────────
 
 // const structured = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
+//   model: 'gemini-2.5-flash',
 //   instructions: 'Devuelve solo JSON válido conforme al schema.',
 //   input: [
 //     {
@@ -108,27 +123,35 @@ await runErrorScenarios(helix, config);
 // const created = await helix.files.create({ file });
 // console.log('created:', created);
 
-// const files = await helix.files.list();
-// console.log('files:', files);
+const files = await helix.files.list();
+console.log('files:', files);
 
-// const fileById = await helix.files.get(created.id);
+// const fileById = await helix.files.get(
+//   'gs://axium-test/helix/ceb1048f-ee2b-43cc-a87e-0cb44ee82dbf',
+// );
 // console.log('fileById:', fileById);
 
-// const resWithFile = await helix.responses.create({
-//   model: 'gemini-3-flash-preview',
-//   input: [
-//     {
-//       role: 'user',
-//       content: [
-//         { type: 'input_file', file_id: created.id },
-//         { type: 'input_text', text: '¿Qué contiene este archivo?' },
-//       ],
-//     },
-//   ],
-//   max_output_tokens: 200,
-//   temperature: 0.2,
-// });
-// console.log('resWithFileContent:', resWithFile);
+const resWithFile = await helix.responses.create({
+  model: 'gemini-2.5-flash',
+  input: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'input_file',
+          file_id:
+            'gs://axium-test/helix/04f1f5c6-46a1-4d40-a1d9-c6c3a68a634f.pdf',
+        },
+        { type: 'input_text', text: '¿Qué contiene este archivo?' },
+      ],
+    },
+  ],
+  max_output_tokens: 200,
+  temperature: 0.2,
+});
+console.log('resWithFileContent:', resWithFile);
 
-// const deleted = await helix.files.delete('files/sjt2iv0uax36');
+// const deleted = await helix.files.delete(
+//   'gs://axium-test/helix/ceb1048f-ee2b-43cc-a87e-0cb44ee82dbf',
+// );
 // console.log('deleted:', deleted);
